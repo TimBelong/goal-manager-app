@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 const LogoLight = require('../assets/images/vertical_logo_light.png');
 const LogoDark = require('../assets/images/vertical_logo_dark.png');
@@ -25,6 +26,7 @@ import { borderRadius, fontSize, spacing } from '../theme/styles';
 type RegisterScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Register'>;
 
 export function RegisterScreen() {
+  const { t } = useTranslation();
   const navigation = useNavigation<RegisterScreenNavigationProp>();
   const { register } = useAuth();
   const { colors, isDark } = useTheme();
@@ -45,23 +47,23 @@ export function RegisterScreen() {
     const newErrors: typeof errors = {};
 
     if (!name.trim()) {
-      newErrors.name = 'Имя обязательно';
+      newErrors.name = t('auth.nameRequired');
     }
 
     if (!email.trim()) {
-      newErrors.email = 'Email обязателен';
+      newErrors.email = t('auth.emailRequired');
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Некорректный email';
+      newErrors.email = t('auth.emailInvalid');
     }
 
     if (!password) {
-      newErrors.password = 'Пароль обязателен';
+      newErrors.password = t('auth.passwordRequired');
     } else if (password.length < 6) {
-      newErrors.password = 'Пароль должен быть не менее 6 символов';
+      newErrors.password = t('auth.passwordMinLength');
     }
 
     if (password !== confirmPassword) {
-      newErrors.confirmPassword = 'Пароли не совпадают';
+      newErrors.confirmPassword = t('auth.passwordsNotMatch');
     }
 
     setErrors(newErrors);
@@ -76,8 +78,8 @@ export function RegisterScreen() {
       await register(email.trim(), password, name.trim());
     } catch (error) {
       Alert.alert(
-        'Ошибка регистрации',
-        error instanceof Error ? error.message : 'Не удалось зарегистрироваться'
+        t('auth.registerError'),
+        error instanceof Error ? error.message : t('auth.registerFailed')
       );
     } finally {
       setIsLoading(false);
@@ -101,7 +103,7 @@ export function RegisterScreen() {
               resizeMode="contain"
             />
             <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-              Создайте новый аккаунт
+              {t('auth.registerTitle')}
             </Text>
           </View>
 
@@ -115,16 +117,16 @@ export function RegisterScreen() {
             ]}
           >
             <Input
-              label="Имя"
+              label={t('auth.name')}
               value={name}
               onChangeText={setName}
-              placeholder="Ваше имя"
+              placeholder={t('auth.namePlaceholder')}
               autoCapitalize="words"
               error={errors.name}
             />
 
             <Input
-              label="Email"
+              label={t('auth.email')}
               value={email}
               onChangeText={setEmail}
               placeholder="example@email.com"
@@ -135,19 +137,19 @@ export function RegisterScreen() {
             />
 
             <Input
-              label="Пароль"
+              label={t('auth.password')}
               value={password}
               onChangeText={setPassword}
-              placeholder="Минимум 6 символов"
+              placeholder={t('auth.passwordMinLength')}
               secureTextEntry
               error={errors.password}
             />
 
             <Input
-              label="Подтвердите пароль"
+              label={t('auth.confirmPassword')}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
-              placeholder="Повторите пароль"
+              placeholder="••••••••"
               secureTextEntry
               error={errors.confirmPassword}
             />
@@ -158,16 +160,16 @@ export function RegisterScreen() {
               fullWidth
               style={styles.registerButton}
             >
-              Зарегистрироваться
+              {t('auth.register')}
             </Button>
 
             <View style={styles.footer}>
               <Text style={[styles.footerText, { color: colors.textSecondary }]}>
-                Уже есть аккаунт?
+                {t('auth.hasAccount')}
               </Text>
               <TouchableOpacity onPress={() => navigation.navigate('Login')}>
                 <Text style={[styles.link, { color: colors.accentPrimary }]}>
-                  Войти
+                  {t('auth.login')}
                 </Text>
               </TouchableOpacity>
             </View>

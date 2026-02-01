@@ -16,6 +16,7 @@ interface SelectOption {
   value: string;
   label: string;
   disabled?: boolean;
+  icon?: React.ReactNode;
 }
 
 interface SelectProps {
@@ -31,7 +32,7 @@ export function Select({
   value,
   options,
   onChange,
-  placeholder = 'Выберите...',
+  placeholder = 'Select...',
   label,
   containerStyle,
 }: SelectProps) {
@@ -63,16 +64,19 @@ export function Select({
           },
         ]}
       >
-        <Text
-          style={[
-            styles.triggerText,
-            {
-              color: selectedOption ? colors.textPrimary : colors.textMuted,
-            },
-          ]}
-        >
-          {selectedOption?.label || placeholder}
-        </Text>
+        <View style={styles.triggerContent}>
+          {selectedOption?.icon}
+          <Text
+            style={[
+              styles.triggerText,
+              {
+                color: selectedOption ? colors.textPrimary : colors.textMuted,
+              },
+            ]}
+          >
+            {selectedOption?.label || placeholder}
+          </Text>
+        </View>
         <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.textMuted} strokeWidth={2}>
           <Path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
         </Svg>
@@ -112,6 +116,7 @@ export function Select({
                     },
                   ]}
                 >
+                  {item.icon}
                   <Text
                     style={[
                       styles.optionText,
@@ -154,6 +159,11 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
   },
+  triggerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
   triggerText: {
     fontSize: fontSize.md,
   },
@@ -172,6 +182,9 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   option: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
   },

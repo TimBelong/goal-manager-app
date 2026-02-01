@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, TextInput } from 'react-native';
 import Svg, { Path, Line } from 'react-native-svg';
+import { useTranslation } from 'react-i18next';
 import { TaskItem } from './TaskItem';
 import { Button, ConfirmModal } from './ui';
 import { useTheme } from '../contexts/ThemeContext';
@@ -24,6 +25,7 @@ export function MonthCard({
   onDeleteTask,
   onDeleteMonth,
 }: MonthCardProps) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const [showAddTask, setShowAddTask] = useState(false);
   const [taskText, setTaskText] = useState('');
@@ -64,7 +66,7 @@ export function MonthCard({
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Text style={[styles.title, { color: colors.textPrimary }]}>
-            {month.name}
+            {t(`months.${month.name}`)}
           </Text>
           <Text style={[styles.stats, { color: colors.textMuted }]}>
             {completedTasks}/{totalTasks}
@@ -112,7 +114,7 @@ export function MonthCard({
           <TextInput
             value={taskText}
             onChangeText={setTaskText}
-            placeholder="Название задачи..."
+            placeholder={t('goals.taskPlaceholder')}
             placeholderTextColor={colors.textMuted}
             style={[
               styles.input,
@@ -127,7 +129,7 @@ export function MonthCard({
           />
           <View style={styles.addTaskActions}>
             <Button size="sm" onPress={handleAddTask} disabled={!taskText.trim()}>
-              Добавить
+              {t('common.add')}
             </Button>
             <Button
               size="sm"
@@ -137,7 +139,7 @@ export function MonthCard({
                 setTaskText('');
               }}
             >
-              Отмена
+              {t('common.cancel')}
             </Button>
           </View>
         </View>
@@ -150,7 +152,7 @@ export function MonthCard({
             <Path d="M12 5v14M5 12h14" strokeLinecap="round" />
           </Svg>
           <Text style={[styles.addTaskText, { color: colors.accentPrimary }]}>
-            Добавить задачу
+            {t('goals.addTask')}
           </Text>
         </TouchableOpacity>
       )}
@@ -158,10 +160,10 @@ export function MonthCard({
 
     <ConfirmModal
       visible={showDeleteConfirm}
-      title="Удалить месяц?"
-      message={`Вы уверены, что хотите удалить "${month.name}" и все его задачи?`}
-      confirmText="Удалить"
-      cancelText="Отмена"
+      title={t('goals.deleteMonth') + '?'}
+      message={t('goals.deleteMonthConfirm')}
+      confirmText={t('common.delete')}
+      cancelText={t('common.cancel')}
       variant="danger"
       onConfirm={confirmDeleteMonth}
       onCancel={() => setShowDeleteConfirm(false)}

@@ -27,21 +27,26 @@ export function useAnalytics(
   goals: Goal[],
   dailyActivity: DailyActivity[],
   getProgress: (goal: Goal) => number,
-  selectedYear?: number
+  selectedYear?: number,
+  monthNames?: string[]
 ) {
   const year = selectedYear ?? getCurrentYear();
+  const defaultMonthNames = monthNames || [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  ];
 
   const analytics = useMemo<AnalyticsData>(() => {
     const yearGoals = goals.filter((g) => g.year === year);
-    
+
     let totalTasks = 0;
     let completedTasks = 0;
-    
+
     const goalProgress = yearGoals.map((goal) => {
       const progress = getProgress(goal);
       let goalTotalTasks = 0;
       let goalCompletedTasks = 0;
-      
+
       if (goal.type === 'plan' && goal.plan) {
         goal.plan.months.forEach((month) => {
           goalTotalTasks += month.tasks.length;
@@ -51,10 +56,10 @@ export function useAnalytics(
         goalTotalTasks = goal.subGoals.length;
         goalCompletedTasks = goal.subGoals.filter((sg) => sg.completed).length;
       }
-      
+
       totalTasks += goalTotalTasks;
       completedTasks += goalCompletedTasks;
-      
+
       return {
         goal,
         progress,
@@ -62,46 +67,37 @@ export function useAnalytics(
         completedTasks: goalCompletedTasks,
       };
     });
-    
+
     const completedGoals = goalProgress.filter((gp) => gp.progress === 100).length;
     const inProgressGoals = goalProgress.filter((gp) => gp.progress > 0 && gp.progress < 100).length;
     const overallProgress = yearGoals.length > 0
       ? Math.round(goalProgress.reduce((sum, gp) => sum + gp.progress, 0) / yearGoals.length)
       : 0;
-    
+
     // Calculate monthly progress
-    const monthlyData: Record<string, { completed: number; total: number }> = {};
-    const monthNames = [
-      'Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн',
-      'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'
-    ];
-    
-    monthNames.forEach((name) => {
-      monthlyData[name] = { completed: 0, total: 0 };
-    });
-    
+    const monthlyData: { completed: number; total: number }[] = defaultMonthNames.map(() => ({ completed: 0, total: 0 }));
+
     yearGoals.forEach((goal) => {
       if (goal.type === 'plan' && goal.plan) {
         goal.plan.months.forEach((month) => {
           const monthIndex = month.order - 1;
-          const monthName = monthNames[monthIndex];
-          if (monthName) {
-            monthlyData[monthName].total += month.tasks.length;
-            monthlyData[monthName].completed += month.tasks.filter((t) => t.completed).length;
+          if (monthIndex >= 0 && monthIndex < 12) {
+            monthlyData[monthIndex].total += month.tasks.length;
+            monthlyData[monthIndex].completed += month.tasks.filter((t) => t.completed).length;
           }
         });
       }
     });
-    
-    const monthlyProgress = monthNames.map((month) => ({
+
+    const monthlyProgress = defaultMonthNames.map((month, index) => ({
       month,
-      completed: monthlyData[month].completed,
-      total: monthlyData[month].total,
-      percentage: monthlyData[month].total > 0
-        ? Math.round((monthlyData[month].completed / monthlyData[month].total) * 100)
+      completed: monthlyData[index].completed,
+      total: monthlyData[index].total,
+      percentage: monthlyData[index].total > 0
+        ? Math.round((monthlyData[index].completed / monthlyData[index].total) * 100)
         : 0,
     }));
-    
+
     return {
       totalGoals: yearGoals.length,
       completedGoals,
@@ -112,7 +108,7 @@ export function useAnalytics(
       goalProgress,
       monthlyProgress,
     };
-  }, [goals, year, getProgress]);
+  }, [goals, year, getProgress, defaultMonthNames]);
 
   const activityByYear = useMemo(() => {
     return dailyActivity.filter((a) => a.date.startsWith(year.toString()));

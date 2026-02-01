@@ -11,12 +11,13 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Svg, { Path, Polyline } from 'react-native-svg';
+import { useTranslation } from 'react-i18next';
 import { MonthCard } from './MonthCard';
 import { SubGoalItem } from './SubGoalItem';
 import { Button, Select, ConfirmModal } from './ui';
 import { useTheme } from '../contexts/ThemeContext';
+import { useMonths } from '../hooks/useMonths';
 import type { Goal } from '../types';
-import { MONTHS_LIST } from '../types';
 import { borderRadius, fontSize, spacing, shadow } from '../theme/styles';
 
 // Enable LayoutAnimation on Android
@@ -71,7 +72,9 @@ export function GoalCard({
   onToggleSubGoal,
   onDeleteSubGoal,
 }: GoalCardProps) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
+  const { months } = useMonths();
   const [isExpanded, setIsExpanded] = useState(false);
   const [showAddMonth, setShowAddMonth] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState('');
@@ -89,8 +92,8 @@ export function GoalCard({
     setExpandedState(goal.id, isExpanded);
   }, [goal.id, isExpanded]);
 
-  const usedMonths = goal.plan?.months.map((m) => m.name) || [];
-  const availableMonths = MONTHS_LIST.filter((m) => !usedMonths.includes(m.name));
+  const usedMonthKeys = goal.plan?.months.map((m) => m.name) || [];
+  const availableMonths = months.filter((m) => !usedMonthKeys.includes(m.key));
 
   const handleExpand = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -99,9 +102,9 @@ export function GoalCard({
 
   const handleAddMonth = () => {
     if (selectedMonth) {
-      const month = MONTHS_LIST.find((m) => m.name === selectedMonth);
+      const month = months.find((m) => m.key === selectedMonth);
       if (month) {
-        onAddMonth(goal.id, month.name, month.order);
+        onAddMonth(goal.id, month.key, month.order);
         setSelectedMonth('');
         setShowAddMonth(false);
       }
@@ -182,7 +185,7 @@ export function GoalCard({
                   },
                 ]}
               >
-                {goal.type === 'plan' ? 'План' : 'Подцели'}
+                {goal.type === 'plan' ? t('analytics.plan') : t('analytics.subgoals')}
               </Text>
             </View>
             <TouchableOpacity onPress={() => onEdit(goal)} style={styles.actionBtn}>
@@ -204,7 +207,7 @@ export function GoalCard({
         <View style={styles.progressSection}>
           <View style={styles.progressInfo}>
             <Text style={[styles.progressLabel, { color: colors.textSecondary }]}>
-              Прогресс
+              {t('goals.progress')}
             </Text>
             <Text style={[styles.progressValue, { color: colors.accentPrimary }]}>
               {progress}%
@@ -248,14 +251,14 @@ export function GoalCard({
                       value={selectedMonth}
                       onChange={setSelectedMonth}
                       options={[
-                        { value: '', label: 'Выберите месяц...', disabled: true },
-                        ...availableMonths.map((m) => ({ value: m.name, label: m.name })),
+                        { value: '', label: t('goals.selectMonth'), disabled: true },
+                        ...availableMonths.map((m) => ({ value: m.key, label: m.name })),
                       ]}
-                      placeholder="Выберите месяц..."
+                      placeholder={t('goals.selectMonth')}
                     />
                     <View style={styles.addMonthActions}>
                       <Button size="sm" onPress={handleAddMonth} disabled={!selectedMonth}>
-                        Добавить
+                        {t('common.add')}
                       </Button>
                       <Button
                         size="sm"
@@ -265,7 +268,7 @@ export function GoalCard({
                           setSelectedMonth('');
                         }}
                       >
-                        Отмена
+                        {t('common.cancel')}
                       </Button>
                     </View>
                   </View>
@@ -275,7 +278,7 @@ export function GoalCard({
                       <Path d="M12 5v14M5 12h14" strokeLinecap="round" />
                     </Svg>
                     <Text style={[styles.addBtnText, { color: colors.accentPrimary }]}>
-                      Добавить месяц
+                      {t('goals.addMonth')}
                     </Text>
                   </TouchableOpacity>
                 ))}
@@ -298,7 +301,7 @@ export function GoalCard({
                   <TextInput
                     value={subGoalText}
                     onChangeText={setSubGoalText}
-                    placeholder="Название подцели..."
+                    placeholder={t('goals.subgoalPlaceholder')}
                     placeholderTextColor={colors.textMuted}
                     style={[
                       styles.input,
@@ -313,7 +316,7 @@ export function GoalCard({
                   />
                   <View style={styles.addSubGoalActions}>
                     <Button size="sm" onPress={handleAddSubGoal} disabled={!subGoalText.trim()}>
-                      Добавить
+                      {t('common.add')}
                     </Button>
                     <Button
                       size="sm"
@@ -323,7 +326,7 @@ export function GoalCard({
                         setSubGoalText('');
                       }}
                     >
-                      Отмена
+                      {t('common.cancel')}
                     </Button>
                   </View>
                 </View>
@@ -333,7 +336,7 @@ export function GoalCard({
                     <Path d="M12 5v14M5 12h14" strokeLinecap="round" />
                   </Svg>
                   <Text style={[styles.addBtnText, { color: colors.accentPrimary }]}>
-                    Добавить подцель
+                    {t('goals.addSubgoal')}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -344,10 +347,10 @@ export function GoalCard({
 
       <ConfirmModal
         visible={showDeleteConfirm}
-        title="Удалить цель?"
-        message={`Вы уверены, что хотите удалить цель "${goal.title}"? Это действие нельзя отменить.`}
-        confirmText="Удалить"
-        cancelText="Отмена"
+        title={t('goals.deleteGoal') + '?'}
+        message={t('goals.deleteGoalMessage', { title: goal.title })}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
         variant="danger"
         onConfirm={confirmDelete}
         onCancel={() => setShowDeleteConfirm(false)}

@@ -7,7 +7,7 @@ import type { Theme } from '../types';
 interface ThemeContextType {
   theme: Theme;
   colors: ThemeColors;
-  toggleTheme: () => void;
+  setTheme: (theme: Theme) => void;
   isDark: boolean;
 }
 
@@ -17,7 +17,7 @@ const THEME_KEY = 'app_theme';
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const systemColorScheme = useColorScheme();
-  const [theme, setTheme] = useState<Theme>('dark');
+  const [theme, setThemeState] = useState<Theme>('dark');
   const [isLoading, setIsLoading] = useState(true);
 
   // Load stored theme preference
@@ -26,9 +26,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       try {
         const savedTheme = await AsyncStorage.getItem(THEME_KEY);
         if (savedTheme === 'light' || savedTheme === 'dark') {
-          setTheme(savedTheme);
+          setThemeState(savedTheme);
         } else if (systemColorScheme === 'light' || systemColorScheme === 'dark') {
-          setTheme(systemColorScheme);
+          setThemeState(systemColorScheme);
         }
       } catch (error) {
         console.error('Failed to load theme:', error);
@@ -40,11 +40,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     loadTheme();
   }, [systemColorScheme]);
 
-  const toggleTheme = useCallback(async () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
+  const setTheme = useCallback(async (newTheme: Theme) => {
+    setThemeState(newTheme);
     await AsyncStorage.setItem(THEME_KEY, newTheme);
-  }, [theme]);
+  }, []);
 
   const colors = theme === 'dark' ? darkTheme : lightTheme;
   const isDark = theme === 'dark';
@@ -54,7 +53,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <ThemeContext.Provider value={{ theme, colors, toggleTheme, isDark }}>
+    <ThemeContext.Provider value={{ theme, colors, setTheme, isDark }}>
       {children}
     </ThemeContext.Provider>
   );

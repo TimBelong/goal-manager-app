@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Svg, { Line } from 'react-native-svg';
+import { useTranslation } from 'react-i18next';
 import { Checkbox, ConfirmModal } from './ui';
 import { useTheme } from '../contexts/ThemeContext';
 import type { SubGoal } from '../types';
@@ -13,6 +14,7 @@ interface SubGoalItemProps {
 }
 
 export function SubGoalItem({ subGoal, onToggle, onDelete }: SubGoalItemProps) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -58,10 +60,10 @@ export function SubGoalItem({ subGoal, onToggle, onDelete }: SubGoalItemProps) {
 
       <ConfirmModal
         visible={showDeleteConfirm}
-        title="Удалить подцель?"
-        message={`Вы уверены, что хотите удалить подцель "${subGoal.text}"?`}
-        confirmText="Удалить"
-        cancelText="Отмена"
+        title={t('goals.deleteSubgoal') + '?'}
+        message={t('goals.deleteSubgoalConfirm', { text: subGoal.text })}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
         variant="danger"
         onConfirm={confirmDelete}
         onCancel={() => setShowDeleteConfirm(false)}

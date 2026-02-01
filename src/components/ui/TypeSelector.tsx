@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Svg, { Rect, Line, Path } from 'react-native-svg';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import type { GoalType } from '../../types';
 import { borderRadius, fontSize, spacing } from '../../theme/styles';
@@ -12,13 +13,14 @@ interface TypeSelectorProps {
 }
 
 export function TypeSelector({ value, onChange, label }: TypeSelectorProps) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
 
   const options = [
     {
       type: 'plan' as GoalType,
-      title: 'План по месяцам',
-      description: 'Добавляйте задачи в каждый месяц',
+      title: t('goals.typePlan'),
+      description: t('goals.typePlanDesc'),
       icon: (color: string) => (
         <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2}>
           <Rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -30,8 +32,8 @@ export function TypeSelector({ value, onChange, label }: TypeSelectorProps) {
     },
     {
       type: 'subgoals' as GoalType,
-      title: 'Подцели',
-      description: 'Список подцелей с чекбоксами',
+      title: t('goals.typeSubgoals'),
+      description: t('goals.typeSubgoalsDesc'),
       icon: (color: string) => (
         <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2}>
           <Path d="M9 11l3 3L22 4" strokeLinecap="round" strokeLinejoin="round" />

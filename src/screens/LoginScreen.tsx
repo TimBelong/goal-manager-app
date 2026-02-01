@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 const LogoLight = require('../assets/images/vertical_logo_light.png');
 const LogoDark = require('../assets/images/vertical_logo_dark.png');
@@ -25,6 +26,7 @@ import { borderRadius, fontSize, spacing } from '../theme/styles';
 type LoginScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>;
 
 export function LoginScreen() {
+  const { t } = useTranslation();
   const navigation = useNavigation<LoginScreenNavigationProp>();
   const { login } = useAuth();
   const { colors, isDark } = useTheme();
@@ -38,13 +40,13 @@ export function LoginScreen() {
     const newErrors: { email?: string; password?: string } = {};
 
     if (!email.trim()) {
-      newErrors.email = 'Email обязателен';
+      newErrors.email = t('auth.emailRequired');
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Некорректный email';
+      newErrors.email = t('auth.emailInvalid');
     }
 
     if (!password) {
-      newErrors.password = 'Пароль обязателен';
+      newErrors.password = t('auth.passwordRequired');
     }
 
     setErrors(newErrors);
@@ -59,8 +61,8 @@ export function LoginScreen() {
       await login(email.trim(), password);
     } catch (error) {
       Alert.alert(
-        'Ошибка входа',
-        error instanceof Error ? error.message : 'Не удалось войти'
+        t('auth.loginError'),
+        error instanceof Error ? error.message : t('auth.loginFailed')
       );
     } finally {
       setIsLoading(false);
@@ -84,7 +86,7 @@ export function LoginScreen() {
               resizeMode="contain"
             />
             <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-              Войдите в свой аккаунт
+              {t('auth.loginTitle')}
             </Text>
           </View>
 
@@ -98,7 +100,7 @@ export function LoginScreen() {
             ]}
           >
             <Input
-              label="Email"
+              label={t('auth.email')}
               value={email}
               onChangeText={setEmail}
               placeholder="example@email.com"
@@ -109,10 +111,10 @@ export function LoginScreen() {
             />
 
             <Input
-              label="Пароль"
+              label={t('auth.password')}
               value={password}
               onChangeText={setPassword}
-              placeholder="Введите пароль"
+              placeholder="••••••••"
               secureTextEntry
               error={errors.password}
             />
@@ -123,16 +125,16 @@ export function LoginScreen() {
               fullWidth
               style={styles.loginButton}
             >
-              Войти
+              {t('auth.login')}
             </Button>
 
             <View style={styles.footer}>
               <Text style={[styles.footerText, { color: colors.textSecondary }]}>
-                Нет аккаунта?
+                {t('auth.noAccount')}
               </Text>
               <TouchableOpacity onPress={() => navigation.navigate('Register')}>
                 <Text style={[styles.link, { color: colors.accentPrimary }]}>
-                  Зарегистрироваться
+                  {t('auth.register')}
                 </Text>
               </TouchableOpacity>
             </View>

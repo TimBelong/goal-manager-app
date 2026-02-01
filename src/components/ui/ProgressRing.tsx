@@ -15,7 +15,7 @@ export function ProgressRing({
   progress,
   size = 120,
   strokeWidth = 10,
-  label = 'Общий прогресс',
+  label = 'Overall progress',
 }: ProgressRingProps) {
   const { colors } = useTheme();
   

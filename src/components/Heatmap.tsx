@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import Svg, { Rect, Line } from 'react-native-svg';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../contexts/ThemeContext';
 import type { DailyActivity } from '../types';
 import { fontSize, spacing, borderRadius } from '../theme/styles';
@@ -21,7 +22,23 @@ interface HeatmapProps {
 }
 
 export function Heatmap({ activity, year }: HeatmapProps) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
+
+  const monthNames = useMemo(() => [
+    t('months.jan'),
+    t('months.feb'),
+    t('months.mar'),
+    t('months.apr'),
+    t('months.mayShort'),
+    t('months.jun'),
+    t('months.jul'),
+    t('months.aug'),
+    t('months.sep'),
+    t('months.oct'),
+    t('months.nov'),
+    t('months.dec'),
+  ], [t]);
 
   const { weeks, months } = useMemo(() => {
     // Generate all days for the year
@@ -51,7 +68,6 @@ export function Heatmap({ activity, year }: HeatmapProps) {
       
       if (current.getMonth() !== currentMonth && isInYear) {
         if (currentMonth !== -1) {
-          const monthNames = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
           months.push({ name: monthNames[currentMonth], weeks: weeksInMonth });
         }
         currentMonth = current.getMonth();
@@ -79,12 +95,11 @@ export function Heatmap({ activity, year }: HeatmapProps) {
     
     // Add last month
     if (currentMonth !== -1) {
-      const monthNames = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
       months.push({ name: monthNames[currentMonth], weeks: weeksInMonth + 1 });
     }
 
     return { weeks, months };
-  }, [activity, year]);
+  }, [activity, year, monthNames]);
 
   const getColor = (count: number): string => {
     if (count < 0) return 'transparent';
@@ -104,7 +119,7 @@ export function Heatmap({ activity, year }: HeatmapProps) {
     <View style={[styles.container, { backgroundColor: colors.bgSecondary, borderColor: colors.borderColor }]}>
       <View style={styles.titleContainer}>
         <CalendarIcon />
-        <Text style={[styles.title, { color: colors.textPrimary }]}>Активность за {year} год</Text>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>{t('analytics.yearActivity', { year })}</Text>
       </View>
       
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -128,9 +143,9 @@ export function Heatmap({ activity, year }: HeatmapProps) {
           <View style={styles.grid}>
             {/* Day labels */}
             <View style={styles.dayLabels}>
-              <Text style={[styles.dayLabel, { color: colors.textMuted }]}>Пн</Text>
-              <Text style={[styles.dayLabel, { color: colors.textMuted }]}>Ср</Text>
-              <Text style={[styles.dayLabel, { color: colors.textMuted }]}>Пт</Text>
+              <Text style={[styles.dayLabel, { color: colors.textMuted }]}>{t('days.mon')}</Text>
+              <Text style={[styles.dayLabel, { color: colors.textMuted }]}>{t('days.wed')}</Text>
+              <Text style={[styles.dayLabel, { color: colors.textMuted }]}>{t('days.fri')}</Text>
             </View>
             
             {/* Cells */}
@@ -168,7 +183,7 @@ export function Heatmap({ activity, year }: HeatmapProps) {
       
       {/* Legend */}
       <View style={styles.legend}>
-        <Text style={[styles.legendText, { color: colors.textMuted }]}>Меньше</Text>
+        <Text style={[styles.legendText, { color: colors.textMuted }]}>{t('analytics.less')}</Text>
         {[0, 1, 2, 3, 4].map((level) => (
           <View
             key={level}
@@ -183,7 +198,7 @@ export function Heatmap({ activity, year }: HeatmapProps) {
             ]}
           />
         ))}
-        <Text style={[styles.legendText, { color: colors.textMuted }]}>Больше</Text>
+        <Text style={[styles.legendText, { color: colors.textMuted }]}>{t('analytics.more')}</Text>
       </View>
     </View>
   );

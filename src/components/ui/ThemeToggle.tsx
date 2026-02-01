@@ -1,6 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, View, StyleSheet, Animated } from 'react-native';
 import Svg, { Circle, Line, Path } from 'react-native-svg';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { borderRadius, spacing } from '../../theme/styles';
 
@@ -9,6 +10,7 @@ interface ThemeToggleProps {
 }
 
 export function ThemeToggle({ size = 40 }: ThemeToggleProps) {
+  const { t } = useTranslation();
   const { isDark, toggleTheme, colors } = useTheme();
   const iconSize = size * 0.5;
 
@@ -24,7 +26,7 @@ export function ThemeToggle({ size = 40 }: ThemeToggleProps) {
           backgroundColor: colors.bgTertiary,
         },
       ]}
-      accessibilityLabel={`Переключить на ${isDark ? 'светлую' : 'тёмную'} тему`}
+      accessibilityLabel={isDark ? t('settings.themeLight') : t('settings.themeDark')}
     >
       <View style={styles.iconWrapper}>
         {/* Sun icon */}

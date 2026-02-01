@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, Rect, Path, Line, Polygon, Polyline } from 'react-native-svg';
+import { useTranslation } from 'react-i18next';
 import { Select, ProgressRing } from '../components/ui';
 import { Heatmap } from '../components/Heatmap';
 import { useGoals } from '../hooks/useGoals';
@@ -68,12 +69,28 @@ const getProgressColor = (progress: number, colors: ThemeColors): string => {
 };
 
 export function AnalyticsScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const { goals, dailyActivity, years, getProgress } = useGoals();
   const [selectedYear, setSelectedYear] = useState(getCurrentYear());
   const [refreshing, setRefreshing] = useState(false);
 
-  const { analytics, activityByYear } = useAnalytics(goals, dailyActivity, getProgress, selectedYear);
+  const monthNames = [
+    t('months.jan'),
+    t('months.feb'),
+    t('months.mar'),
+    t('months.apr'),
+    t('months.mayShort'),
+    t('months.jun'),
+    t('months.jul'),
+    t('months.aug'),
+    t('months.sep'),
+    t('months.oct'),
+    t('months.nov'),
+    t('months.dec'),
+  ];
+
+  const { analytics, activityByYear } = useAnalytics(goals, dailyActivity, getProgress, selectedYear, monthNames);
 
   const yearOptions = years.length > 0
     ? years.map((y) => ({ value: y.toString(), label: y.toString() }))
@@ -123,7 +140,7 @@ export function AnalyticsScreen() {
         <View style={styles.header}>
           <View style={styles.titleContainer}>
             <ChartIcon />
-            <Text style={[styles.title, { color: colors.textPrimary }]}>Аналитика</Text>
+            <Text style={[styles.title, { color: colors.textPrimary }]}>{t('analytics.title')}</Text>
           </View>
           <View style={styles.yearSelect}>
             <Select
@@ -141,29 +158,29 @@ export function AnalyticsScreen() {
               progress={analytics.overallProgress}
               size={140}
               strokeWidth={12}
-              label="Общий прогресс"
+              label={t('analytics.overallProgress')}
             />
           </View>
           <View style={[styles.divider, { backgroundColor: colors.borderColor }]} />
           <View style={styles.statsGrid}>
             <StatCard
-              title="Цели"
+              title={t('analytics.goals')}
               value={`${analytics.completedGoals}/${analytics.totalGoals}`}
-              subtitle="целей выполнено"
+              subtitle={t('analytics.goalsCompleted')}
               icon={<TargetIcon />}
               color={colors.accentPrimary}
             />
             <StatCard
-              title="В процессе"
+              title={t('analytics.inProgress')}
               value={analytics.inProgressGoals}
-              subtitle="целей в работе"
+              subtitle={t('analytics.goalsInProgress')}
               icon={<ClockIcon />}
               color={colors.warning}
             />
             <StatCard
-              title="Задачи"
+              title={t('analytics.tasks')}
               value={`${analytics.completedTasks}/${analytics.totalTasks}`}
-              subtitle="задач выполнено"
+              subtitle={t('analytics.tasksCompleted')}
               icon={<ListIcon />}
               color={colors.success}
             />
@@ -174,7 +191,7 @@ export function AnalyticsScreen() {
         {analytics.goalProgress.length > 0 && (
           <View style={[styles.section, { backgroundColor: colors.bgSecondary, borderColor: colors.borderColor }]}>
             <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
-              Прогресс по целям
+              {t('analytics.goalProgress')}
             </Text>
             {[...analytics.goalProgress]
               .sort((a, b) => b.progress - a.progress)
@@ -205,7 +222,7 @@ export function AnalyticsScreen() {
                       <View style={styles.goalTypeContainer}>
                         {item.goal.type === 'plan' ? <CalendarIcon /> : <LayersIcon />}
                         <Text style={[styles.goalProgressType, { color: colors.textMuted }]}>
-                          {item.goal.type === 'plan' ? ' План' : ' Подцели'}
+                          {' '}{item.goal.type === 'plan' ? t('analytics.plan') : t('analytics.subgoals')}
                         </Text>
                       </View>
                       <Text style={[styles.goalProgressStats, { color: colors.textMuted }]}>
@@ -221,7 +238,7 @@ export function AnalyticsScreen() {
         {/* Monthly Progress */}
         <View style={[styles.section, { backgroundColor: colors.bgSecondary, borderColor: colors.borderColor }]}>
           <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
-            Прогресс по месяцам
+            {t('analytics.monthlyProgress')}
           </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={styles.monthlyChart}>
@@ -285,11 +302,11 @@ export function AnalyticsScreen() {
           <View style={styles.legend}>
             <View style={styles.legendItem}>
               <View style={[styles.legendDot, { backgroundColor: colors.bgTertiary }]} />
-              <Text style={[styles.legendText, { color: colors.textMuted }]}>Всего задач</Text>
+              <Text style={[styles.legendText, { color: colors.textMuted }]}>{t('analytics.totalTasks')}</Text>
             </View>
             <View style={styles.legendItem}>
               <View style={[styles.legendDot, { backgroundColor: colors.accentPrimary }]} />
-              <Text style={[styles.legendText, { color: colors.textMuted }]}>Выполнено</Text>
+              <Text style={[styles.legendText, { color: colors.textMuted }]}>{t('analytics.completed')}</Text>
             </View>
           </View>
         </View>
@@ -422,6 +439,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: 8,
   },
   goalTypeContainer: {
     flexDirection: 'row',

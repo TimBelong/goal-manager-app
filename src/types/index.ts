@@ -42,20 +42,23 @@ export interface DailyActivity {
   tasksCompleted: number;
 }
 
+// Month keys for translation - used to store and identify months
 export const MONTHS_LIST = [
-  { name: 'Январь', order: 1 },
-  { name: 'Февраль', order: 2 },
-  { name: 'Март', order: 3 },
-  { name: 'Апрель', order: 4 },
-  { name: 'Май', order: 5 },
-  { name: 'Июнь', order: 6 },
-  { name: 'Июль', order: 7 },
-  { name: 'Август', order: 8 },
-  { name: 'Сентябрь', order: 9 },
-  { name: 'Октябрь', order: 10 },
-  { name: 'Ноябрь', order: 11 },
-  { name: 'Декабрь', order: 12 },
+  { key: 'january', order: 1 },
+  { key: 'february', order: 2 },
+  { key: 'march', order: 3 },
+  { key: 'april', order: 4 },
+  { key: 'may', order: 5 },
+  { key: 'june', order: 6 },
+  { key: 'july', order: 7 },
+  { key: 'august', order: 8 },
+  { key: 'september', order: 9 },
+  { key: 'october', order: 10 },
+  { key: 'november', order: 11 },
+  { key: 'december', order: 12 },
 ] as const;
+
+export type MonthKey = (typeof MONTHS_LIST)[number]['key'];
 
 export type Theme = 'light' | 'dark';
 

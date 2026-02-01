@@ -11,23 +11,23 @@ import {
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 const HorizontalLogoLight = require('../assets/images/horizontal_logo_light.png');
 const HorizontalLogoDark = require('../assets/images/horizontal_logo_dark.png');
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { YearSection } from '../components/YearSection';
-import { Button, Input, Select, TypeSelector, ThemeToggle } from '../components/ui';
+import { Button, Input, Select, TypeSelector } from '../components/ui';
 import { useGoals } from '../hooks/useGoals';
-import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import type { Goal, GoalType } from '../types';
 import { getCurrentYear } from '../types';
 import { borderRadius, fontSize, spacing, shadow } from '../theme/styles';
 
 export function GoalsScreen() {
+  const { t } = useTranslation();
   const { colors, isDark } = useTheme();
-  const { user, logout } = useAuth();
   const {
     goals,
     years,
@@ -75,7 +75,7 @@ export function GoalsScreen() {
 
   const handleSubmit = async () => {
     if (!formTitle.trim()) {
-      Alert.alert('Ошибка', 'Введите название цели');
+      Alert.alert(t('common.error'), t('goals.errorEnterTitle'));
       return;
     }
 
@@ -87,7 +87,7 @@ export function GoalsScreen() {
       }
       setShowForm(false);
     } catch (error) {
-      Alert.alert('Ошибка', 'Не удалось сохранить цель');
+      Alert.alert(t('common.error'), t('goals.errorSaveGoal'));
     }
   };
 
@@ -105,29 +105,12 @@ export function GoalsScreen() {
           resizeMode="contain"
         />
       </View>
-      <View style={styles.headerRight}>
-        <ThemeToggle size={36} />
-        <TouchableOpacity onPress={handleAddGoal} style={[styles.addBtn, { backgroundColor: colors.accentPrimary }]}>
-          <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth={2}>
-            <Path d="M12 5v14M5 12h14" strokeLinecap="round" />
-          </Svg>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={logout} style={styles.logoutBtn}>
-          <Text style={[styles.userName, { color: colors.textSecondary }]}>
-            {user?.name
-              ?.split(' ')
-              .filter(Boolean)
-              .map((n) => n[0])
-              .join('')
-              .toUpperCase()
-              .slice(0, 2)}
-          </Text>
-          <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={colors.textMuted} strokeWidth={2}>
-            <Path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-            <Path d="M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
-          </Svg>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity onPress={handleAddGoal} style={[styles.addBtn, { backgroundColor: colors.accentPrimary }]}>
+        <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth={2.5}>
+          <Path d="M12 5v14M5 12h14" strokeLinecap="round" />
+        </Svg>
+        <Text style={styles.addBtnText}>{t('goals.newGoal')}</Text>
+      </TouchableOpacity>
     </View>
   );
 
@@ -156,12 +139,12 @@ export function GoalsScreen() {
   const renderEmpty = () => (
     <View style={styles.emptyState}>
       <Text style={styles.emptyIcon}>🎯</Text>
-      <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>Нет целей</Text>
+      <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>{t('goals.emptyTitle')}</Text>
       <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-        Создайте свою первую цель, чтобы начать
+        {t('goals.emptyText')}
       </Text>
       <Button onPress={handleAddGoal} style={styles.emptyButton}>
-        Создать цель
+        {t('goals.createGoal')}
       </Button>
     </View>
   );
@@ -200,21 +183,21 @@ export function GoalsScreen() {
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: colors.bgSecondary }]}>
             <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
-              {editingGoal ? 'Редактировать цель' : 'Новая цель'}
+              {editingGoal ? t('goals.editGoal') : t('goals.newGoal')}
             </Text>
 
             <Input
-              label="Название"
+              label={t('goals.goalTitle')}
               value={formTitle}
               onChangeText={setFormTitle}
-              placeholder="Название цели"
+              placeholder={t('goals.goalTitlePlaceholder')}
             />
 
             <Input
-              label="Описание"
+              label={t('goals.goalDescription')}
               value={formDescription}
               onChangeText={setFormDescription}
-              placeholder="Описание (опционально)"
+              placeholder={t('goals.goalDescriptionPlaceholder')}
               multiline
               numberOfLines={3}
             />
@@ -222,7 +205,7 @@ export function GoalsScreen() {
             {!editingGoal && (
               <>
                 <Select
-                  label="Год"
+                  label={t('goals.goalYear')}
                   value={formYear}
                   onChange={setFormYear}
                   options={Array.from({ length: 7 }, (_, i) => {
@@ -232,7 +215,7 @@ export function GoalsScreen() {
                 />
 
                 <TypeSelector
-                  label="Тип отслеживания"
+                  label={t('goals.goalType')}
                   value={formType}
                   onChange={setFormType}
                 />
@@ -241,14 +224,14 @@ export function GoalsScreen() {
 
             <View style={styles.modalActions}>
               <Button onPress={handleSubmit} fullWidth>
-                {editingGoal ? 'Сохранить' : 'Создать'}
+                {editingGoal ? t('common.save') : t('common.create')}
               </Button>
               <Button
                 variant="ghost"
                 onPress={() => setShowForm(false)}
                 fullWidth
               >
-                Отмена
+                {t('common.cancel')}
               </Button>
             </View>
           </View>
@@ -287,29 +270,18 @@ const styles = StyleSheet.create({
     width: 150,
     height: 40,
   },
-  headerTitle: {
-    fontSize: fontSize.lg,
-    fontWeight: '700',
-  },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
   addBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoutBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: borderRadius.md,
   },
-  userName: {
+  addBtnText: {
+    color: '#ffffff',
     fontSize: fontSize.sm,
+    fontWeight: '600',
   },
   listContent: {
     paddingHorizontal: spacing.lg,

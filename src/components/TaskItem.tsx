@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Svg, { Line } from 'react-native-svg';
+import { useTranslation } from 'react-i18next';
 import { Checkbox, ConfirmModal } from './ui';
 import { useTheme } from '../contexts/ThemeContext';
 import type { Task } from '../types';
@@ -13,6 +14,7 @@ interface TaskItemProps {
 }
 
 export function TaskItem({ task, onToggle, onDelete }: TaskItemProps) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -58,10 +60,10 @@ export function TaskItem({ task, onToggle, onDelete }: TaskItemProps) {
 
       <ConfirmModal
         visible={showDeleteConfirm}
-        title="Удалить задачу?"
-        message={`Вы уверены, что хотите удалить задачу "${task.text}"?`}
-        confirmText="Удалить"
-        cancelText="Отмена"
+        title={t('goals.deleteTask') + '?'}
+        message={t('goals.deleteTaskConfirm', { text: task.text })}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
         variant="danger"
         onConfirm={confirmDelete}
         onCancel={() => setShowDeleteConfirm(false)}
