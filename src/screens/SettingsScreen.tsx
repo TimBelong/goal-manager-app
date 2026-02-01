@@ -13,7 +13,7 @@ import {
 } from '../i18n';
 import { borderRadius, fontSize, spacing } from '../theme/styles';
 
-const SunIcon = ({ size = 28, color = '#8b5cf6' }: { size?: number; color?: string }) => (
+const SunIcon = ({ size = 16, color = '#8b5cf6' }: { size?: number; color?: string }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <Circle cx="12" cy="12" r="3" stroke={color} strokeWidth="2" />
     <Path
@@ -25,7 +25,7 @@ const SunIcon = ({ size = 28, color = '#8b5cf6' }: { size?: number; color?: stri
   </Svg>
 );
 
-const MoonIcon = ({ size = 28, color = '#8b5cf6' }: { size?: number; color?: string }) => (
+const MoonIcon = ({ size = 16, color = '#8b5cf6' }: { size?: number; color?: string }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <Path
       d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
@@ -34,6 +34,34 @@ const MoonIcon = ({ size = 28, color = '#8b5cf6' }: { size?: number; color?: str
       strokeLinecap="round"
       strokeLinejoin="round"
     />
+  </Svg>
+);
+
+const LanguageIcon = ({ color }: { color: string }) => (
+  <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
+    <Circle cx="12" cy="12" r="10" />
+    <Path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+  </Svg>
+);
+
+const ThemeIcon = ({ color }: { color: string }) => (
+  <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
+    <Circle cx="12" cy="12" r="5" />
+    <Path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2" />
+  </Svg>
+);
+
+const UserIcon = ({ color }: { color: string }) => (
+  <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
+    <Path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <Circle cx="12" cy="7" r="4" />
+  </Svg>
+);
+
+const InfoIcon = ({ color }: { color: string }) => (
+  <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
+    <Circle cx="12" cy="12" r="10" />
+    <Path d="M12 16v-4M12 8h.01" />
   </Svg>
 );
 
@@ -57,9 +85,8 @@ const ArFlagIcon = () => (
   <Image source={require('../assets/images/arabic-flag.png')} style={styles.flagIcon} />
 );
 
-// Logout icon
 const LogoutIcon = ({ color }: { color: string }) => (
-  <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+  <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
     <Path
       d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"
       stroke={color}
@@ -92,8 +119,8 @@ export function SettingsScreen() {
   });
 
   const themeOptions = [
-    { value: 'light', label: t('settings.themeLight'), icon: <SunIcon size={24} /> },
-    { value: 'dark', label: t('settings.themeDark'), icon: <MoonIcon size={24} /> },
+    { value: 'light', label: t('settings.themeLight'), icon: <SunIcon size={16} color={colors.textSecondary} /> },
+    { value: 'dark', label: t('settings.themeDark'), icon: <MoonIcon size={16} color={colors.textSecondary} /> },
   ];
 
   return (
@@ -107,81 +134,96 @@ export function SettingsScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <View style={styles.titleContainer}>
-          <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.textPrimary} strokeWidth={2}>
+        <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.textPrimary} strokeWidth={2}>
             <Circle cx="12" cy="12" r="5" />
             <Path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 
             1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.08a1.65 1.65 0 0 0 
             1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.08a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
           </Svg>
-            <Text style={[styles.title, { color: colors.textPrimary }]}>
-              {t('settings.title')}
-            </Text>
-          </View>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>
+            {t('settings.title')}
+          </Text>
         </View>
 
-        {/* Account Info */}
+        {/* Account Block */}
         {user && (
-          <View style={[styles.accountCard, { backgroundColor: colors.bgSecondary }]}>
-            <View style={[styles.avatar, { backgroundColor: colors.accentPrimary }]}>
-              <Text style={styles.avatarText}>
-                {user.name
-                  ?.split(' ')
-                  .filter(Boolean)
-                  .map((n) => n[0])
-                  .join('')
-                  .toUpperCase()
-                  .slice(0, 2)}
-              </Text>
+          <View style={[styles.settingsBlock, { backgroundColor: colors.bgSecondary, borderColor: colors.borderColor }]}>
+             <View style={styles.accountContent}>
+              <View style={[styles.avatar, { backgroundColor: colors.accentPrimary }]}>
+                <Text style={styles.avatarText}>
+                  {user.name
+                    ?.split(' ')
+                    .filter(Boolean)
+                    .map((n) => n[0])
+                    .join('')
+                    .toUpperCase()
+                    .slice(0, 2)}
+                </Text>
+              </View>
+              <View style={styles.accountInfo}>
+                <Text style={[styles.accountName, { color: colors.textPrimary }]}>
+                  {user.name}
+                </Text>
+                <Text style={[styles.accountEmail, { color: colors.textSecondary }]}>
+                  {user.email}
+                </Text>
+              </View>
             </View>
-            <View style={styles.accountInfo}>
-              <Text style={[styles.accountName, { color: colors.textPrimary }]}>
-                {user.name}
-              </Text>
-              <Text style={[styles.accountEmail, { color: colors.textSecondary }]}>
-                {user.email}
-              </Text>
-            </View>
+           
           </View>
         )}
 
-        {/* Settings List */}
-        <View style={styles.settingsList}>
-          {/* Language */}
-          <View style={styles.settingItem}>
-            <Text style={[styles.settingLabel, { color: colors.textPrimary }]}>
+        {/* Language Block */}
+        <View style={[styles.settingsBlock, { backgroundColor: colors.bgSecondary, borderColor: colors.borderColor }]}>
+          <View style={styles.blockHeader}>
+            <View style={[styles.blockIcon, { backgroundColor: colors.bgTertiary }]}>
+              <LanguageIcon color={colors.textSecondary} />
+            </View>
+            <Text style={[styles.blockTitle, { color: colors.textPrimary }]}>
               {t('settings.language')}
             </Text>
-            <Select
-              value={language}
-              options={languageOptions}
-              onChange={(value) => changeLanguage(value as typeof language)}
-              containerStyle={styles.selectContainer}
-            />
           </View>
-
-          {/* Theme */}
-          <View style={styles.settingItem}>
-            <Text style={[styles.settingLabel, { color: colors.textPrimary }]}>
-              {t('settings.theme')}
-            </Text>
-            <Select
-              value={isDark ? 'dark' : 'light'}
-              options={themeOptions}
-              onChange={(value) => setTheme(value as 'light' | 'dark')}
-              containerStyle={styles.selectContainer}
-            />
-          </View>
+          <Select
+            value={language}
+            options={languageOptions}
+            onChange={(value) => changeLanguage(value as typeof language)}
+            containerStyle={styles.selectContainer}
+          />
         </View>
 
-        {/* Version */}
-        <View style={styles.versionContainer}>
-          <Text style={[styles.versionLabel, { color: colors.textMuted }]}>
-            {t('settings.version')}
-          </Text>
-          <Text style={[styles.versionValue, { color: colors.textMuted }]}>
-            1.0.0
-          </Text>
+        {/* Theme Block */}
+        <View style={[styles.settingsBlock, { backgroundColor: colors.bgSecondary, borderColor: colors.borderColor }]}>
+          <View style={styles.blockHeader}>
+            <View style={[styles.blockIcon, { backgroundColor: colors.bgTertiary }]}>
+              <ThemeIcon color={colors.textSecondary} />
+            </View>
+            <Text style={[styles.blockTitle, { color: colors.textPrimary }]}>
+              {t('settings.theme')}
+            </Text>
+          </View>
+          <Select
+            value={isDark ? 'dark' : 'light'}
+            options={themeOptions}
+            onChange={(value) => setTheme(value as 'light' | 'dark')}
+            containerStyle={styles.selectContainer}
+          />
+        </View>
+
+        {/* Version Block */}
+        <View style={[styles.settingsBlock, { backgroundColor: colors.bgSecondary, borderColor: colors.borderColor }]}>
+          <View style={styles.blockHeader}>
+            <View style={[styles.blockIcon, { backgroundColor: colors.bgTertiary }]}>
+              <InfoIcon color={colors.textSecondary} />
+            </View>
+            <Text style={[styles.blockTitle, { color: colors.textPrimary }]}>
+              {t('settings.version')}
+            </Text>
+          </View>
+          <View style={styles.versionContent}>
+            <Text style={[styles.versionValue, { color: colors.textSecondary }]}>
+              1.0.0
+            </Text>
+          </View>
         </View>
 
         {/* Logout Button */}
@@ -210,80 +252,81 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   header: {
-    marginBottom: spacing.xl,
-  },
-  titleContainer: {
+    marginBottom: spacing.lg,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
   },
   title: {
-    fontSize: fontSize.xxl,
+    fontSize: fontSize.xl,
     fontWeight: '700',
   },
-  accountCard: {
+  settingsBlock: {
+    borderWidth: 1,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
+  },
+  blockHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: spacing.lg,
-    borderRadius: borderRadius.lg,
-    marginBottom: spacing.xl,
-    gap: spacing.md,
+    marginBottom: spacing.md,
+    gap: spacing.sm,
   },
-  avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+  blockIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: borderRadius.sm,
     alignItems: 'center',
     justifyContent: 'center',
   },
-
-  flagIcon: {
-    width: 24,
-    height: 24,
+  blockTitle: {
+    fontSize: fontSize.sm,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
-
+  accountContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   avatarText: {
     color: '#ffffff',
-    fontSize: fontSize.lg,
+    fontSize: fontSize.md,
     fontWeight: '700',
   },
   accountInfo: {
     flex: 1,
   },
   accountName: {
-    fontSize: fontSize.lg,
+    fontSize: fontSize.md,
     fontWeight: '600',
     marginBottom: 2,
   },
   accountEmail: {
-    fontSize: fontSize.sm,
-  },
-  settingsList: {
-    marginBottom: spacing.xl,
-  },
-  settingItem: {
-    marginBottom: spacing.md,
-  },
-  settingLabel: {
-    fontSize: fontSize.sm,
-    fontWeight: '500',
-    marginBottom: spacing.xs,
+    fontSize: fontSize.xs,
   },
   selectContainer: {
     marginBottom: 0,
   },
-  versionContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-    marginBottom: spacing.xl,
-  },
-  versionLabel: {
-    fontSize: fontSize.sm,
+  versionContent: {
+    paddingTop: spacing.xs,
   },
   versionValue: {
     fontSize: fontSize.sm,
+    fontWeight: '500',
+  },
+  flagIcon: {
+    width: 20,
+    height: 20,
   },
   logoutButton: {
     flexDirection: 'row',
@@ -293,10 +336,10 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     borderRadius: borderRadius.md,
     borderWidth: 1.5,
-    marginTop: 'auto',
+    marginTop: spacing.lg,
   },
   logoutText: {
-    fontSize: fontSize.md,
+    fontSize: fontSize.sm,
     fontWeight: '600',
   },
 });
