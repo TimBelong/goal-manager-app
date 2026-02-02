@@ -40,22 +40,40 @@ class ApiService {
       Object.assign(headers, optHeaders);
     }
 
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      ...options,
-      headers,
-    });
+    const url = `${this.baseUrl}${endpoint}`;
+    
+    try {
+      const response = await fetch(url, {
+        ...options,
+        headers,
+      });
 
-    if (!response.ok) {
-      const error: ApiError = await response.json().catch(() => ({ message: 'Request failed' }));
-      throw new Error(error.message || `HTTP error ${response.status}`);
+      if (!response.ok) {
+        const error: ApiError = await response.json().catch(() => ({ message: 'Request failed' }));
+        throw new Error(error.message || `HTTP error ${response.status}`);
+      }
+
+      // Handle 204 No Content
+      if (response.status === 204) {
+        return undefined as T;
+      }
+
+      return response.json();
+    } catch (error: any) {
+      // Enhanced error logging for debugging
+      console.error('API Request Error:', {
+        url,
+        method: options.method || 'GET',
+        error: error.message,
+        stack: error.stack,
+      });
+      
+      // Re-throw with more context
+      if (error.message === 'Network request failed' || error.message?.includes('Network')) {
+        throw new Error(`Network error: Cannot connect to ${this.baseUrl}. Please check your internet connection and server availability.`);
+      }
+      throw error;
     }
-
-    // Handle 204 No Content
-    if (response.status === 204) {
-      return undefined as T;
-    }
-
-    return response.json();
   }
 
   // Auth
