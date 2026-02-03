@@ -54,120 +54,120 @@ export function MonthCard({
 
   return (
     <>
-    <View
-      style={[
-        styles.container,
-        {
-          backgroundColor: colors.bgSecondary,
-          borderColor: colors.borderColor,
-        },
-      ]}
-    >
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Text style={[styles.title, { color: colors.textPrimary }]}>
-            {t(`months.${month.name}`)}
-          </Text>
-          <Text style={[styles.stats, { color: colors.textMuted }]}>
-            {completedTasks}/{totalTasks}
-          </Text>
+      <View
+        style={[
+          styles.container,
+          {
+            backgroundColor: colors.bgSecondary,
+            borderColor: colors.borderColor,
+          },
+        ]}
+      >
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <Text style={[styles.title, { color: colors.textPrimary }]}>
+              {t(`months.${month.name}`)}
+            </Text>
+            <Text style={[styles.stats, { color: colors.textMuted }]}>
+              {completedTasks}/{totalTasks}
+            </Text>
+          </View>
+          <TouchableOpacity
+            onPress={handleDeleteMonth}
+            style={styles.deleteBtn}
+          >
+            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.textMuted} strokeWidth={2}>
+              <Line x1="18" y1="6" x2="6" y2="18" strokeLinecap="round" />
+              <Line x1="6" y1="6" x2="18" y2="18" strokeLinecap="round" />
+            </Svg>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          onPress={handleDeleteMonth}
-          style={styles.deleteBtn}
-        >
-          <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.textMuted} strokeWidth={2}>
-            <Line x1="18" y1="6" x2="6" y2="18" strokeLinecap="round" />
-            <Line x1="6" y1="6" x2="18" y2="18" strokeLinecap="round" />
-          </Svg>
-        </TouchableOpacity>
-      </View>
 
-      {/* Progress bar */}
-      <View style={[styles.progressBar, { backgroundColor: colors.bgTertiary }]}>
-        <View
-          style={[
-            styles.progressFill,
-            {
-              width: `${progress}%`,
-              backgroundColor: colors.accentPrimary,
-            },
-          ]}
-        />
-      </View>
-
-      {/* Tasks */}
-      <View style={styles.tasks}>
-        {month.tasks.map((task) => (
-          <TaskItem
-            key={task.id}
-            task={task}
-            onToggle={() => onToggleTask(goalId, month.id, task.id)}
-            onDelete={() => onDeleteTask(goalId, month.id, task.id)}
-          />
-        ))}
-      </View>
-
-      {/* Add task */}
-      {showAddTask ? (
-        <View style={styles.addTaskForm}>
-          <TextInput
-            value={taskText}
-            onChangeText={setTaskText}
-            placeholder={t('goals.taskPlaceholder')}
-            placeholderTextColor={colors.textMuted}
+        {/* Progress bar */}
+        <View style={[styles.progressBar, { backgroundColor: colors.bgTertiary }]}>
+          <View
             style={[
-              styles.input,
+              styles.progressFill,
               {
-                backgroundColor: colors.bgTertiary,
-                color: colors.textPrimary,
-                borderColor: colors.borderColor,
+                width: `${progress}%`,
+                backgroundColor: colors.accentPrimary,
               },
             ]}
-            onSubmitEditing={handleAddTask}
-            autoFocus
           />
-          <View style={styles.addTaskActions}>
-            <Button size="sm" onPress={handleAddTask} disabled={!taskText.trim()}>
-              {t('common.add')}
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onPress={() => {
-                setShowAddTask(false);
-                setTaskText('');
-              }}
-            >
-              {t('common.cancel')}
-            </Button>
-          </View>
         </View>
-      ) : (
-        <TouchableOpacity
-          onPress={() => setShowAddTask(true)}
-          style={styles.addTaskBtn}
-        >
-          <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.accentPrimary} strokeWidth={2}>
-            <Path d="M12 5v14M5 12h14" strokeLinecap="round" />
-          </Svg>
-          <Text style={[styles.addTaskText, { color: colors.accentPrimary }]}>
-            {t('goals.addTask')}
-          </Text>
-        </TouchableOpacity>
-      )}
-    </View>
 
-    <ConfirmModal
-      visible={showDeleteConfirm}
-      title={t('goals.deleteMonth') + '?'}
-      message={t('goals.deleteMonthConfirm')}
-      confirmText={t('common.delete')}
-      cancelText={t('common.cancel')}
-      variant="danger"
-      onConfirm={confirmDeleteMonth}
-      onCancel={() => setShowDeleteConfirm(false)}
-    />
+        {/* Tasks */}
+        <View style={styles.tasks}>
+          {month.tasks.map((task) => (
+            <TaskItem
+              key={task.id}
+              task={task}
+              onToggle={() => onToggleTask(goalId, month.id, task.id)}
+              onDelete={() => onDeleteTask(goalId, month.id, task.id)}
+            />
+          ))}
+        </View>
+
+        {/* Add task */}
+        {showAddTask ? (
+          <View style={styles.addTaskForm}>
+            <TextInput
+              value={taskText}
+              onChangeText={setTaskText}
+              placeholder={t('goals.taskPlaceholder')}
+              placeholderTextColor={colors.textMuted}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: colors.bgTertiary,
+                  color: colors.textPrimary,
+                  borderColor: colors.borderColor,
+                },
+              ]}
+              onSubmitEditing={handleAddTask}
+              autoFocus
+            />
+            <View style={styles.addTaskActions}>
+              <Button size="sm" onPress={handleAddTask} disabled={!taskText.trim()}>
+                {t('common.add')}
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onPress={() => {
+                  setShowAddTask(false);
+                  setTaskText('');
+                }}
+              >
+                {t('common.cancel')}
+              </Button>
+            </View>
+          </View>
+        ) : (
+          <TouchableOpacity
+            onPress={() => setShowAddTask(true)}
+            style={styles.addTaskBtn}
+          >
+            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.accentPrimary} strokeWidth={2}>
+              <Path d="M12 5v14M5 12h14" strokeLinecap="round" />
+            </Svg>
+            <Text style={[styles.addTaskText, { color: colors.accentPrimary }]}>
+              {t('goals.addTask')}
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      <ConfirmModal
+        visible={showDeleteConfirm}
+        title={t('goals.deleteMonth') + '?'}
+        message={t('goals.deleteMonthConfirm')}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
+        variant="danger"
+        onConfirm={confirmDeleteMonth}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </>
   );
 }
