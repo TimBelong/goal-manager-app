@@ -1,4 +1,4 @@
-import type { Goal, GoalType, Month, Task, SubGoal, DailyActivity } from '../types';
+import type { Goal, GoalType, GoalCategory, Month, Task, SubGoal, DailyActivity } from '../types';
 
 // For Android emulator: use 10.0.2.2 (alias for host machine's localhost)
 // For iOS simulator: use localhost
@@ -41,7 +41,7 @@ class ApiService {
     }
 
     const url = `${this.baseUrl}${endpoint}`;
-    
+
     try {
       const response = await fetch(url, {
         ...options,
@@ -67,7 +67,7 @@ class ApiService {
         error: error.message,
         stack: error.stack,
       });
-      
+
       // Re-throw with more context
       if (error.message === 'Network request failed' || error.message?.includes('Network')) {
         throw new Error(`Network error: Cannot connect to ${this.baseUrl}. Please check your internet connection and server availability.`);
@@ -95,24 +95,28 @@ class ApiService {
     return this.request<UserDto>('/auth/me');
   }
 
+  async deleteAccount(): Promise<void> {
+    await this.request('/auth/me', { method: 'DELETE' });
+  }
+
   // Goals
   async getGoals(): Promise<Goal[]> {
     const response = await this.request<GoalApiResponse[]>('/goals');
     return response.map(mapGoalFromApi);
   }
 
-  async createGoal(title: string, description: string, type: GoalType, year?: number): Promise<Goal> {
+  async createGoal(title: string, description: string, type: GoalType, category: GoalCategory, year?: number, targetAmount?: number, currentAmount?: number): Promise<Goal> {
     const response = await this.request<GoalApiResponse>('/goals', {
       method: 'POST',
-      body: JSON.stringify({ title, description, type, year }),
+      body: JSON.stringify({ title, description, type, category, year, targetAmount, currentAmount }),
     });
     return mapGoalFromApi(response);
   }
 
-  async updateGoal(goalId: string, title: string, description: string): Promise<Goal> {
+  async updateGoal(goalId: string, title: string, description: string, category: GoalCategory, targetAmount?: number, currentAmount?: number): Promise<Goal> {
     const response = await this.request<GoalApiResponse>(`/goals/${goalId}`, {
       method: 'PUT',
-      body: JSON.stringify({ title, description }),
+      body: JSON.stringify({ title, description, category, targetAmount, currentAmount }),
     });
     return mapGoalFromApi(response);
   }
@@ -197,10 +201,13 @@ interface GoalApiResponse {
   title: string;
   description?: string;
   type: string;
+  category: string;
   year: number;
   createdAt: string;
   months?: MonthApiResponse[];
   subGoals?: SubGoalApiResponse[];
+  targetAmount?: number;
+  currentAmount?: number;
   progress: number;
 }
 
@@ -240,6 +247,7 @@ function mapGoalFromApi(goal: GoalApiResponse): Goal {
     title: goal.title,
     description: goal.description,
     type: goal.type as GoalType,
+    category: goal.category as GoalCategory,
     year: goal.year,
     createdAt: goal.createdAt,
   };
@@ -253,6 +261,13 @@ function mapGoalFromApi(goal: GoalApiResponse): Goal {
         months: goal.months?.map(mapMonthFromApi) || [],
       },
     };
+  } else if (goal.type === 'savings') {
+    return {
+      ...baseGoal,
+      type: 'savings',
+      targetAmount: goal.targetAmount,
+      currentAmount: goal.currentAmount,
+    };
   } else {
     return {
       ...baseGoal,
@@ -261,6 +276,7 @@ function mapGoalFromApi(goal: GoalApiResponse): Goal {
     };
   }
 }
+
 
 function mapMonthFromApi(month: MonthApiResponse): Month {
   return {

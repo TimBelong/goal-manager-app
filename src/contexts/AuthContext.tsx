@@ -10,6 +10,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
+  deleteAccount: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -90,7 +91,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(null);
     setUser(null);
     api.setToken(null);
-    
+
+    await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
+  }, []);
+
+  const deleteAccount = useCallback(async () => {
+    await api.deleteAccount();
+
+    setToken(null);
+    setUser(null);
+    api.setToken(null);
+
     await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
   }, []);
 
@@ -104,6 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         register,
         logout,
+        deleteAccount,
       }}
     >
       {children}

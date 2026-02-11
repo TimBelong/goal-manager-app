@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  TextInput,
   LayoutAnimation,
   Platform,
   UIManager,
@@ -14,7 +13,7 @@ import Svg, { Path, Polyline } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 import { MonthCard } from './MonthCard';
 import { SubGoalItem } from './SubGoalItem';
-import { Button, Select, ConfirmModal } from './ui';
+import { Button, Select, ConfirmModal, InputModal, Input } from './ui';
 import { useTheme } from '../contexts/ThemeContext';
 import { useMonths } from '../hooks/useMonths';
 import type { Goal } from '../types';
@@ -56,6 +55,7 @@ interface GoalCardProps {
   onAddSubGoal: (goalId: string, text: string) => void;
   onToggleSubGoal: (goalId: string, subGoalId: string) => void;
   onDeleteSubGoal: (goalId: string, subGoalId: string) => void;
+  onUpdateSavings: (goalId: string, delta: number) => void;
 }
 
 export function GoalCard({
@@ -71,6 +71,7 @@ export function GoalCard({
   onAddSubGoal,
   onToggleSubGoal,
   onDeleteSubGoal,
+  onUpdateSavings,
 }: GoalCardProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
@@ -79,8 +80,8 @@ export function GoalCard({
   const [showAddMonth, setShowAddMonth] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState('');
   const [showAddSubGoal, setShowAddSubGoal] = useState(false);
-  const [subGoalText, setSubGoalText] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [savingsInput, setSavingsInput] = useState('');
 
   // Load expanded state from AsyncStorage on mount
   useEffect(() => {
@@ -100,23 +101,24 @@ export function GoalCard({
     setIsExpanded(!isExpanded);
   };
 
+  const toggleAddMonth = (show: boolean) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setShowAddMonth(show);
+    if (!show) setSelectedMonth('');
+  };
+
   const handleAddMonth = () => {
     if (selectedMonth) {
       const month = months.find((m) => m.key === selectedMonth);
       if (month) {
         onAddMonth(goal.id, month.key, month.order);
-        setSelectedMonth('');
-        setShowAddMonth(false);
+        toggleAddMonth(false);
       }
     }
   };
 
-  const handleAddSubGoal = () => {
-    if (subGoalText.trim()) {
-      onAddSubGoal(goal.id, subGoalText.trim());
-      setSubGoalText('');
-      setShowAddSubGoal(false);
-    }
+  const handleAddSubGoal = (text: string) => {
+    onAddSubGoal(goal.id, text);
   };
 
   const handleDelete = () => {
@@ -181,11 +183,11 @@ export function GoalCard({
                 style={[
                   styles.badgeText,
                   {
-                    color: goal.type === 'plan' ? colors.accentPrimary : colors.accentSecondary,
+                    color: goal.type === 'plan' ? colors.accentPrimary : goal.type === 'savings' ? colors.success : colors.accentSecondary,
                   },
                 ]}
               >
-                {goal.type === 'plan' ? t('analytics.plan') : t('analytics.subgoals')}
+                {goal.type === 'plan' ? t('analytics.plan') : goal.type === 'savings' ? (t('goals.typeSavings') || 'Копилка') : t('analytics.subgoals')}
               </Text>
             </View>
             <TouchableOpacity onPress={() => onEdit(goal)} style={styles.actionBtn}>
@@ -210,7 +212,9 @@ export function GoalCard({
               {t('goals.progress')}
             </Text>
             <Text style={[styles.progressValue, { color: colors.accentPrimary }]}>
-              {progress}%
+              {goal.type === 'savings'
+                ? `${goal.currentAmount || 0} / ${goal.targetAmount}`
+                : `${progress}%`}
             </Text>
           </View>
           <View style={[styles.progressBar, { backgroundColor: colors.bgTertiary }]}>
@@ -263,17 +267,14 @@ export function GoalCard({
                       <Button
                         size="sm"
                         variant="ghost"
-                        onPress={() => {
-                          setShowAddMonth(false);
-                          setSelectedMonth('');
-                        }}
+                        onPress={() => toggleAddMonth(false)}
                       >
                         {t('common.cancel')}
                       </Button>
                     </View>
                   </View>
                 ) : (
-                  <TouchableOpacity onPress={() => setShowAddMonth(true)} style={styles.addBtn}>
+                  <TouchableOpacity onPress={() => toggleAddMonth(true)} style={styles.addBtn}>
                     <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.accentPrimary} strokeWidth={2}>
                       <Path d="M12 5v14M5 12h14" strokeLinecap="round" />
                     </Svg>
@@ -296,54 +297,76 @@ export function GoalCard({
                 />
               ))}
 
-              {showAddSubGoal ? (
-                <View style={styles.addSubGoalForm}>
-                  <TextInput
-                    value={subGoalText}
-                    onChangeText={setSubGoalText}
-                    placeholder={t('goals.subgoalPlaceholder')}
-                    placeholderTextColor={colors.textMuted}
-                    style={[
-                      styles.input,
-                      {
-                        backgroundColor: colors.bgTertiary,
-                        color: colors.textPrimary,
-                        borderColor: colors.borderColor,
-                      },
-                    ]}
-                    onSubmitEditing={handleAddSubGoal}
-                    autoFocus
-                  />
-                  <View style={styles.addSubGoalActions}>
-                    <Button size="sm" onPress={handleAddSubGoal} disabled={!subGoalText.trim()}>
-                      {t('common.add')}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onPress={() => {
-                        setShowAddSubGoal(false);
-                        setSubGoalText('');
-                      }}
-                    >
-                      {t('common.cancel')}
-                    </Button>
-                  </View>
-                </View>
-              ) : (
-                <TouchableOpacity onPress={() => setShowAddSubGoal(true)} style={styles.addBtn}>
-                  <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.accentPrimary} strokeWidth={2}>
-                    <Path d="M12 5v14M5 12h14" strokeLinecap="round" />
-                  </Svg>
-                  <Text style={[styles.addBtnText, { color: colors.accentPrimary }]}>
-                    {t('goals.addSubgoal')}
-                  </Text>
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity onPress={() => setShowAddSubGoal(true)} style={styles.addBtn}>
+                <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.accentPrimary} strokeWidth={2}>
+                  <Path d="M12 5v14M5 12h14" strokeLinecap="round" />
+                </Svg>
+                <Text style={[styles.addBtnText, { color: colors.accentPrimary }]}>
+                  {t('goals.addSubgoal')}
+                </Text>
+              </TouchableOpacity>
             </>
           )}
         </View>
       )}
+
+      {goal.type === 'savings' && (
+        <View style={styles.savingsContainer}>
+          <Text style={[styles.savingsLabel, { color: colors.textSecondary }]}>
+            {t('goals.addFunds') || 'Добавить/Снять средства'}
+          </Text>
+          <View style={styles.savingsControls}>
+            <Button
+              size="sm"
+              variant="ghost" // Using ghost but maybe outline is better if exists, or custom
+              style={[styles.savingsBtn, { borderColor: colors.danger, borderWidth: 1 }]}
+              textStyle={{ color: colors.danger }}
+              disabled={!savingsInput}
+              onPress={() => {
+                const val = parseFloat(savingsInput);
+                if (val > 0) {
+                  onUpdateSavings(goal.id, -val);
+                  setSavingsInput('');
+                }
+              }}
+            >
+              -
+            </Button>
+            <View style={[styles.savingsInputWrapper, { backgroundColor: colors.bgTertiary }]}>
+              <Input
+                value={savingsInput}
+                onChangeText={setSavingsInput}
+                placeholder="0"
+                keyboardType="numeric"
+                style={styles.savingsInput}
+              // Simplified Input usage here, assuming Input component fits or wrapping it
+              />
+            </View>
+            <Button
+              size="sm"
+              style={styles.savingsBtn}
+              disabled={!savingsInput}
+              onPress={() => {
+                const val = parseFloat(savingsInput);
+                if (val > 0) {
+                  onUpdateSavings(goal.id, val);
+                  setSavingsInput('');
+                }
+              }}
+            >
+              +
+            </Button>
+          </View>
+        </View>
+      )}
+
+
+      <InputModal
+        visible={showAddSubGoal}
+        placeholder={t('goals.subgoalPlaceholder')}
+        onSubmit={handleAddSubGoal}
+        onClose={() => setShowAddSubGoal(false)}
+      />
 
       <ConfirmModal
         visible={showDeleteConfirm}
@@ -355,7 +378,7 @@ export function GoalCard({
         onConfirm={confirmDelete}
         onCancel={() => setShowDeleteConfirm(false)}
       />
-    </View>
+    </View >
   );
 }
 
@@ -442,19 +465,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing.sm,
   },
-  addSubGoalForm: {
-    gap: spacing.sm,
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: borderRadius.sm,
-    padding: spacing.md,
-    fontSize: fontSize.sm,
-  },
-  addSubGoalActions: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
   addBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -464,5 +474,36 @@ const styles = StyleSheet.create({
   addBtnText: {
     fontSize: fontSize.sm,
     fontWeight: '500',
+  },
+  savingsContainer: {
+    marginTop: spacing.md,
+  },
+  savingsLabel: {
+    fontSize: fontSize.sm,
+    marginBottom: spacing.xs,
+  },
+  savingsControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  savingsBtn: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 0,
+  },
+  savingsInputWrapper: {
+    flex: 1,
+    borderRadius: borderRadius.md,
+    height: 40,
+    justifyContent: 'center',
+  },
+  savingsInput: {
+    fontSize: fontSize.md,
+    textAlign: 'center',
+    height: '100%',
+    paddingVertical: 0,
   },
 });

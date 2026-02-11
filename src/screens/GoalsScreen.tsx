@@ -10,6 +10,7 @@ import {
   Alert,
   RefreshControl,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -18,10 +19,10 @@ const HorizontalLogoDark = require('../assets/images/horizontal_logo_dark.png');
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { YearSection } from '../components/YearSection';
-import { Button, Input, Select, TypeSelector } from '../components/ui';
+import { Button, Input, Select, TypeSelector, CategorySelector } from '../components/ui';
 import { useGoals } from '../hooks/useGoals';
 import { useTheme } from '../contexts/ThemeContext';
-import type { Goal, GoalType } from '../types';
+import type { Goal, GoalType, GoalCategory } from '../types';
 import { getCurrentYear } from '../types';
 import { borderRadius, fontSize, spacing, shadow } from '../theme/styles';
 
@@ -45,14 +46,21 @@ export function GoalsScreen() {
     toggleSubGoal,
     deleteSubGoal,
     getProgress,
+    updateSavingsAmount,
   } = useGoals();
 
-  const [showForm, setShowForm] = useState(false);
+  // Step 1: Category selection modal
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  // Step 2: Details form modal
+  const [showFormModal, setShowFormModal] = useState(false);
+
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
   const [formTitle, setFormTitle] = useState('');
   const [formDescription, setFormDescription] = useState('');
   const [formType, setFormType] = useState<GoalType>('plan');
+  const [formCategory, setFormCategory] = useState<GoalCategory>('PersonalDevelopment');
   const [formYear, setFormYear] = useState(getCurrentYear().toString());
+  const [formTargetAmount, setFormTargetAmount] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
   const handleAddGoal = () => {
@@ -60,8 +68,18 @@ export function GoalsScreen() {
     setFormTitle('');
     setFormDescription('');
     setFormType('plan');
+    setFormCategory('PersonalDevelopment');
     setFormYear(getCurrentYear().toString());
-    setShowForm(true);
+    setFormTargetAmount('');
+    // Show category selection first
+    setShowCategoryModal(true);
+  };
+
+  const handleCategorySelected = (category: GoalCategory) => {
+    setFormCategory(category);
+    setShowCategoryModal(false);
+    // Show details form
+    setShowFormModal(true);
   };
 
   const handleEditGoal = (goal: Goal) => {
@@ -69,25 +87,31 @@ export function GoalsScreen() {
     setFormTitle(goal.title);
     setFormDescription(goal.description || '');
     setFormType(goal.type);
+    setFormCategory(goal.category);
     setFormYear(goal.year.toString());
-    setShowForm(true);
+    setFormTargetAmount(goal.targetAmount ? goal.targetAmount.toString() : '');
+    // Skip type selection, go directly to form
+    setShowFormModal(true);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!formTitle.trim()) {
       Alert.alert(t('common.error'), t('goals.errorEnterTitle'));
       return;
     }
 
-    try {
-      if (editingGoal) {
-        await updateGoal(editingGoal.id, formTitle.trim(), formDescription.trim());
-      } else {
-        await addGoal(formTitle.trim(), formDescription.trim(), formType, parseInt(formYear));
-      }
-      setShowForm(false);
-    } catch (error) {
-      Alert.alert(t('common.error'), t('goals.errorSaveGoal'));
+    // Close modal immediately (optimistic UI)
+    setShowFormModal(false);
+
+    // Fire and forget - GoalsContext handles optimistic updates and rollback
+    if (editingGoal) {
+      updateGoal(editingGoal.id, formTitle.trim(), formDescription.trim(), formCategory, formType === 'savings' ? parseFloat(formTargetAmount) : undefined).catch(() => {
+        Alert.alert(t('common.error'), t('goals.errorSaveGoal'));
+      });
+    } else {
+      addGoal(formTitle.trim(), formDescription.trim(), formType, formCategory, parseInt(formYear), formType === 'savings' ? parseFloat(formTargetAmount) : undefined).catch(() => {
+        Alert.alert(t('common.error'), t('goals.errorSaveGoal'));
+      });
     }
   };
 
@@ -132,6 +156,7 @@ export function GoalsScreen() {
         onAddSubGoal={addSubGoal}
         onToggleSubGoal={toggleSubGoal}
         onDeleteSubGoal={deleteSubGoal}
+        onUpdateSavings={updateSavingsAmount}
       />
     );
   };
@@ -178,10 +203,36 @@ export function GoalsScreen() {
         }
       />
 
-      {/* Goal Form Modal */}
-      <Modal visible={showForm} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: colors.bgSecondary }]}>
+      {/* Step 1: Category Selection Modal */}
+      <Modal visible={showCategoryModal} animationType="slide">
+        <SafeAreaView style={[styles.modalOverlay, { backgroundColor: colors.bgPrimary }]}>
+          <View style={styles.modalContent}>
+            <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
+              {t('categories.title')}
+            </Text>
+
+            <CategorySelector
+              value={formCategory}
+              onChange={handleCategorySelected}
+            />
+
+            <View style={styles.modalActions}>
+              <Button
+                variant="ghost"
+                onPress={() => setShowCategoryModal(false)}
+                fullWidth
+              >
+                {t('common.cancel')}
+              </Button>
+            </View>
+          </View>
+        </SafeAreaView>
+      </Modal>
+
+      {/* Step 2: Goal Details Modal */}
+      <Modal visible={showFormModal} animationType="slide">
+        <SafeAreaView style={[styles.modalOverlay, { backgroundColor: colors.bgPrimary }]}>
+          <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
             <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
               {editingGoal ? t('goals.editGoal') : t('goals.newGoal')}
             </Text>
@@ -215,11 +266,30 @@ export function GoalsScreen() {
                 />
 
                 <TypeSelector
-                  label={t('goals.goalType')}
                   value={formType}
                   onChange={setFormType}
                 />
+
+                {formType === 'savings' && (
+                  <Input
+                    label={t('goals.targetAmount') || 'Целевая сумма'}
+                    value={formTargetAmount}
+                    onChangeText={setFormTargetAmount}
+                    placeholder="0"
+                    keyboardType="numeric"
+                  />
+                )}
               </>
+            )}
+
+            {editingGoal && editingGoal.type === 'savings' && (
+              <Input
+                label={t('goals.targetAmount') || 'Целевая сумма'}
+                value={formTargetAmount}
+                onChangeText={setFormTargetAmount}
+                placeholder="0"
+                keyboardType="numeric"
+              />
             )}
 
             <View style={styles.modalActions}>
@@ -228,14 +298,14 @@ export function GoalsScreen() {
               </Button>
               <Button
                 variant="ghost"
-                onPress={() => setShowForm(false)}
+                onPress={() => setShowFormModal(false)}
                 fullWidth
               >
                 {t('common.cancel')}
               </Button>
             </View>
-          </View>
-        </View>
+          </ScrollView>
+        </SafeAreaView>
       </Modal>
     </SafeAreaView>
   );
@@ -313,12 +383,9 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
   },
   modalContent: {
-    borderTopLeftRadius: borderRadius.xl,
-    borderTopRightRadius: borderRadius.xl,
+    flex: 1,
     padding: spacing.xxl,
     paddingBottom: spacing.xxxl,
   },

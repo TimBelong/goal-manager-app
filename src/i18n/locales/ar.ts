@@ -57,6 +57,9 @@ export default {
     deleteSubgoalConfirm: 'هل أنت متأكد من حذف الهدف الفرعي "{{text}}"؟',
     progress: 'التقدم',
     deleteGoalMessage: 'هل أنت متأكد من حذف الهدف "{{title}}"؟ لا يمكن التراجع عن هذا الإجراء.',
+    current: 'الحالي',
+    noGoalsForYear: 'لا توجد أهداف لعام {{year}}',
+    selectGoalType: 'اختر نوع الهدف',
   },
 
   // Analytics Screen
@@ -118,6 +121,9 @@ export default {
     account: 'الحساب',
     about: 'حول',
     version: 'الإصدار',
+    deleteAccount: 'حذف الحساب',
+    deleteAccountConfirm: 'هل أنت متأكد من حذف حسابك؟ سيتم حذف جميع بياناتك بشكل دائم. لا يمكن التراجع عن هذا الإجراء.',
+    deleteAccountError: 'فشل حذف الحساب. يرجى المحاولة مرة أخرى.',
   },
 
   // Months
@@ -153,5 +159,20 @@ export default {
     mon: 'الإثنين',
     wed: 'الأربعاء',
     fri: 'الجمعة',
+  },
+
+  // Categories
+  categories: {
+    title: 'الفئة',
+    PersonalDevelopment: 'التطوير الشخصي',
+    Career: 'المهنة',
+    Finance: 'المالية',
+    Health: 'الصحة',
+    Sport: 'الرياضة',
+    Nutrition: 'التغذية',
+    Relationships: 'العلاقات',
+    Habits: 'العادات',
+    Travel: 'السفر',
+    Other: 'أخرى',
   },
 } as const;

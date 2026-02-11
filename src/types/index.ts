@@ -24,15 +24,30 @@ export interface SubGoal {
   completedAt?: string; // ISO date when subgoal was completed
 }
 
-export type GoalType = 'plan' | 'subgoals';
+export type GoalType = 'plan' | 'subgoals' | 'savings';
+
+export type GoalCategory =
+  | 'PersonalDevelopment'
+  | 'Career'
+  | 'Finance'
+  | 'Health'
+  | 'Sport'
+  | 'Nutrition'
+  | 'Relationships'
+  | 'Habits'
+  | 'Travel'
+  | 'Other';
 
 export interface Goal {
   id: string;
   title: string;
   description?: string;
   type: GoalType;
+  category: GoalCategory;
   plan?: Plan;
   subGoals?: SubGoal[];
+  targetAmount?: number;
+  currentAmount?: number;
   createdAt: string;
   year: number; // 2025, 2026, etc.
 }

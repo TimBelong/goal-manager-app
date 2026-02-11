@@ -57,6 +57,9 @@ export default {
     deleteSubgoalConfirm: '您确定要删除子目标"{{text}}"吗？',
     progress: '进度',
     deleteGoalMessage: '您确定要删除目标"{{title}}"吗？此操作无法撤销。',
+    current: '当前',
+    noGoalsForYear: '{{year}}年没有目标',
+    selectGoalType: '选择目标类型',
   },
 
   // Analytics Screen
@@ -118,6 +121,9 @@ export default {
     account: '账户',
     about: '关于',
     version: '版本',
+    deleteAccount: '删除账户',
+    deleteAccountConfirm: '您确定要删除您的账户吗？您的所有数据将被永久删除。此操作无法撤销。',
+    deleteAccountError: '删除账户失败。请重试。',
   },
 
   // Months
@@ -153,5 +159,20 @@ export default {
     mon: '周一',
     wed: '周三',
     fri: '周五',
+  },
+
+  // Categories
+  categories: {
+    title: '类别',
+    PersonalDevelopment: '个人发展',
+    Career: '职业',
+    Finance: '财务',
+    Health: '健康',
+    Sport: '运动',
+    Nutrition: '营养',
+    Relationships: '人际关系',
+    Habits: '习惯',
+    Travel: '旅行',
+    Other: '其他',
   },
 } as const;

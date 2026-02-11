@@ -41,6 +41,19 @@ export function TypeSelector({ value, onChange, label }: TypeSelectorProps) {
         </Svg>
       ),
     },
+    {
+      type: 'savings' as GoalType,
+      title: t('goals.typeSavings') || 'Копилка',
+      description: t('goals.typeSavingsDesc') || 'Накопительная цель',
+      icon: (color: string) => (
+        <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2}>
+          <Path d="M12 1v22M5 12h14" strokeLinecap="round" />
+          <Rect x="2" y="6" width="20" height="12" rx="2" ry="2" />
+          <Line x1="12" y1="2" x2="12" y2="4" />
+          <Line x1="12" y1="20" x2="12" y2="22" />
+        </Svg>
+      ),
+    },
   ];
 
   return (

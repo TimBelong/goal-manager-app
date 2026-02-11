@@ -5,4 +5,6 @@ export { Select } from './Select';
 export { ConfirmModal } from './ConfirmModal';
 export { ProgressRing } from './ProgressRing';
 export { TypeSelector } from './TypeSelector';
+export { CategorySelector } from './CategorySelector';
 export { ThemeToggle } from './ThemeToggle';
+export { InputModal } from './InputModal';

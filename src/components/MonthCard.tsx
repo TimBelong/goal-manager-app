@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, TextInput } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
 import Svg, { Path, Line } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 import { TaskItem } from './TaskItem';
-import { Button, ConfirmModal } from './ui';
+import { ConfirmModal, InputModal } from './ui';
 import { useTheme } from '../contexts/ThemeContext';
 import type { Month } from '../types';
 import { borderRadius, fontSize, spacing } from '../theme/styles';
@@ -28,23 +33,14 @@ export function MonthCard({
   const { t } = useTranslation();
   const { colors } = useTheme();
   const [showAddTask, setShowAddTask] = useState(false);
-  const [taskText, setTaskText] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const completedTasks = month.tasks.filter((t) => t.completed).length;
   const totalTasks = month.tasks.length;
   const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
-  const handleAddTask = () => {
-    if (taskText.trim()) {
-      onAddTask(goalId, month.id, taskText.trim());
-      setTaskText('');
-      setShowAddTask(false);
-    }
-  };
-
-  const handleDeleteMonth = () => {
-    setShowDeleteConfirm(true);
+  const handleAddTask = (text: string) => {
+    onAddTask(goalId, month.id, text);
   };
 
   const confirmDeleteMonth = () => {
@@ -73,7 +69,7 @@ export function MonthCard({
             </Text>
           </View>
           <TouchableOpacity
-            onPress={handleDeleteMonth}
+            onPress={() => setShowDeleteConfirm(true)}
             style={styles.deleteBtn}
           >
             <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.textMuted} strokeWidth={2}>
@@ -108,55 +104,26 @@ export function MonthCard({
           ))}
         </View>
 
-        {/* Add task */}
-        {showAddTask ? (
-          <View style={styles.addTaskForm}>
-            <TextInput
-              value={taskText}
-              onChangeText={setTaskText}
-              placeholder={t('goals.taskPlaceholder')}
-              placeholderTextColor={colors.textMuted}
-              style={[
-                styles.input,
-                {
-                  backgroundColor: colors.bgTertiary,
-                  color: colors.textPrimary,
-                  borderColor: colors.borderColor,
-                },
-              ]}
-              onSubmitEditing={handleAddTask}
-              autoFocus
-            />
-            <View style={styles.addTaskActions}>
-              <Button size="sm" onPress={handleAddTask} disabled={!taskText.trim()}>
-                {t('common.add')}
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onPress={() => {
-                  setShowAddTask(false);
-                  setTaskText('');
-                }}
-              >
-                {t('common.cancel')}
-              </Button>
-            </View>
-          </View>
-        ) : (
-          <TouchableOpacity
-            onPress={() => setShowAddTask(true)}
-            style={styles.addTaskBtn}
-          >
-            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.accentPrimary} strokeWidth={2}>
-              <Path d="M12 5v14M5 12h14" strokeLinecap="round" />
-            </Svg>
-            <Text style={[styles.addTaskText, { color: colors.accentPrimary }]}>
-              {t('goals.addTask')}
-            </Text>
-          </TouchableOpacity>
-        )}
+        {/* Add task button */}
+        <TouchableOpacity
+          onPress={() => setShowAddTask(true)}
+          style={styles.addTaskBtn}
+        >
+          <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.accentPrimary} strokeWidth={2}>
+            <Path d="M12 5v14M5 12h14" strokeLinecap="round" />
+          </Svg>
+          <Text style={[styles.addTaskText, { color: colors.accentPrimary }]}>
+            {t('goals.addTask')}
+          </Text>
+        </TouchableOpacity>
       </View>
+
+      <InputModal
+        visible={showAddTask}
+        placeholder={t('goals.taskPlaceholder')}
+        onSubmit={handleAddTask}
+        onClose={() => setShowAddTask(false)}
+      />
 
       <ConfirmModal
         visible={showDeleteConfirm}
@@ -212,19 +179,6 @@ const styles = StyleSheet.create({
   },
   tasks: {
     marginBottom: spacing.sm,
-  },
-  addTaskForm: {
-    gap: spacing.sm,
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: borderRadius.sm,
-    padding: spacing.md,
-    fontSize: fontSize.sm,
-  },
-  addTaskActions: {
-    flexDirection: 'row',
-    gap: spacing.sm,
   },
   addTaskBtn: {
     flexDirection: 'row',

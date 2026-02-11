@@ -57,6 +57,9 @@ export default {
     deleteSubgoalConfirm: 'Вы уверены, что хотите удалить подцель "{{text}}"?',
     progress: 'Прогресс',
     deleteGoalMessage: 'Вы уверены, что хотите удалить цель "{{title}}"? Это действие нельзя отменить.',
+    current: 'Текущий',
+    noGoalsForYear: 'Нет целей на {{year}} год',
+    selectGoalType: 'Выберите тип цели',
   },
 
   // Analytics Screen
@@ -118,6 +121,9 @@ export default {
     account: 'Аккаунт',
     about: 'О приложении',
     version: 'Версия',
+    deleteAccount: 'Удалить аккаунт',
+    deleteAccountConfirm: 'Вы уверены, что хотите удалить свой аккаунт? Все ваши данные будут безвозвратно удалены. Это действие нельзя отменить.',
+    deleteAccountError: 'Не удалось удалить аккаунт. Попробуйте ещё раз.',
   },
 
   // Months
@@ -153,5 +159,20 @@ export default {
     mon: 'Пн',
     wed: 'Ср',
     fri: 'Пт',
+  },
+
+  // Categories
+  categories: {
+    title: 'Категория',
+    PersonalDevelopment: 'Саморазвитие',
+    Career: 'Карьера',
+    Finance: 'Финансы',
+    Health: 'Здоровье',
+    Sport: 'Спорт',
+    Nutrition: 'Питание',
+    Relationships: 'Отношения',
+    Habits: 'Привычки',
+    Travel: 'Путешествия',
+    Other: 'Другое',
   },
 } as const;

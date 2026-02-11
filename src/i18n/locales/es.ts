@@ -57,6 +57,9 @@ export default {
     deleteSubgoalConfirm: '¿Estás seguro de que quieres eliminar el subobjetivo "{{text}}"?',
     progress: 'Progreso',
     deleteGoalMessage: '¿Estás seguro de que quieres eliminar el objetivo "{{title}}"? Esta acción no se puede deshacer.',
+    current: 'Actual',
+    noGoalsForYear: 'No hay objetivos para {{year}}',
+    selectGoalType: 'Selecciona el tipo de objetivo',
   },
 
   // Analytics Screen
@@ -118,6 +121,9 @@ export default {
     account: 'Cuenta',
     about: 'Acerca de',
     version: 'Versión',
+    deleteAccount: 'Eliminar cuenta',
+    deleteAccountConfirm: '¿Estás seguro de que quieres eliminar tu cuenta? Todos tus datos serán eliminados permanentemente. Esta acción no se puede deshacer.',
+    deleteAccountError: 'No se pudo eliminar la cuenta. Por favor, inténtalo de nuevo.',
   },
 
   // Months
@@ -153,5 +159,20 @@ export default {
     mon: 'Lu',
     wed: 'Mi',
     fri: 'Vi',
+  },
+
+  // Categories
+  categories: {
+    title: 'Categoria',
+    PersonalDevelopment: 'Desarrollo Personal',
+    Career: 'Carrera',
+    Finance: 'Finanzas',
+    Health: 'Salud',
+    Sport: 'Deporte',
+    Nutrition: 'Nutricion',
+    Relationships: 'Relaciones',
+    Habits: 'Habitos',
+    Travel: 'Viajes',
+    Other: 'Otro',
   },
 } as const;

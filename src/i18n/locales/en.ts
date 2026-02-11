@@ -57,6 +57,9 @@ export default {
     deleteSubgoalConfirm: 'Are you sure you want to delete subgoal "{{text}}"?',
     progress: 'Progress',
     deleteGoalMessage: 'Are you sure you want to delete goal "{{title}}"? This action cannot be undone.',
+    current: 'Current',
+    noGoalsForYear: 'No goals for {{year}}',
+    selectGoalType: 'Select goal type',
   },
 
   // Analytics Screen
@@ -118,6 +121,9 @@ export default {
     account: 'Account',
     about: 'About',
     version: 'Version',
+    deleteAccount: 'Delete Account',
+    deleteAccountConfirm: 'Are you sure you want to delete your account? All your data will be permanently deleted. This action cannot be undone.',
+    deleteAccountError: 'Failed to delete account. Please try again.',
   },
 
   // Months
@@ -153,5 +159,20 @@ export default {
     mon: 'Mo',
     wed: 'We',
     fri: 'Fr',
+  },
+
+  // Categories
+  categories: {
+    title: 'Category',
+    PersonalDevelopment: 'Personal Development',
+    Career: 'Career',
+    Finance: 'Finance',
+    Health: 'Health',
+    Sport: 'Sport',
+    Nutrition: 'Nutrition',
+    Relationships: 'Relationships',
+    Habits: 'Habits',
+    Travel: 'Travel',
+    Other: 'Other',
   },
 } as const;

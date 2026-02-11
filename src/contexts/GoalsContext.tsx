@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { LayoutAnimation, Platform, UIManager } from 'react-native';
 import { api } from '../services/api';
 import { useAuth } from './AuthContext';
-import type { Goal, GoalType, DailyActivity, Month, Task, SubGoal } from '../types';
+import type { Goal, GoalType, GoalCategory, DailyActivity, Month, Task, SubGoal } from '../types';
 import { getCurrentYear } from '../types';
 
 // Enable LayoutAnimation on Android
@@ -35,8 +35,9 @@ interface GoalsContextType {
     years: number[];
     goalsByYear: Record<number, Goal[]>;
     isLoading: boolean;
-    addGoal: (title: string, description: string, type: GoalType, year?: number) => Promise<Goal>;
-    updateGoal: (goalId: string, title: string, description: string) => Promise<Goal>;
+    addGoal: (title: string, description: string, type: GoalType, category: GoalCategory, year?: number, targetAmount?: number, currentAmount?: number) => Promise<Goal>;
+    updateGoal: (goalId: string, title: string, description: string, category: GoalCategory, targetAmount?: number, currentAmount?: number) => Promise<Goal>;
+    updateSavingsAmount: (goalId: string, delta: number) => Promise<void>;
     deleteGoal: (goalId: string) => Promise<void>;
     addMonth: (goalId: string, monthName: string, monthOrder: number) => Promise<void>;
     deleteMonth: (goalId: string, monthId: string) => Promise<void>;
@@ -85,7 +86,7 @@ export function GoalsProvider({ children }: { children: React.ReactNode }) {
         fetchData();
     }, [isAuthenticated, fetchData]);
 
-    const addGoal = useCallback(async (title: string, description: string, type: GoalType, year?: number) => {
+    const addGoal = useCallback(async (title: string, description: string, type: GoalType, category: GoalCategory, year?: number, targetAmount?: number, currentAmount?: number) => {
         // Optimistic update
         const tempId = generateTempId();
         const tempGoal: Goal = {
@@ -93,16 +94,20 @@ export function GoalsProvider({ children }: { children: React.ReactNode }) {
             title,
             description,
             type,
+            category,
             year: year ?? getCurrentYear(),
+            targetAmount,
+            currentAmount: currentAmount ?? 0,
             createdAt: new Date().toISOString(),
-            ...(type === 'plan' ? { plan: { id: tempId, months: [] } } : { subGoals: [] }),
+            ...(type === 'plan' ? { plan: { id: tempId, months: [] } } : type === 'subgoals' ? { subGoals: [] } : {}),
         };
 
-        LayoutAnimation.configureNext(layoutAnimConfig);
+        const listId = "goals-list"; // Should ideally be unique per list but we only have one main list
+        // LayoutAnimation.configureNext(layoutAnimConfig); // Removing this might reduce jumpiness if issues arise
         setGoals((prev) => [tempGoal, ...prev]);
 
         try {
-            const newGoal = await api.createGoal(title, description, type, year);
+            const newGoal = await api.createGoal(title, description, type, category, year, targetAmount, currentAmount);
             // Replace temp goal with real one
             setGoals((prev) => prev.map((g) => (g.id === tempId ? newGoal : g)));
             return newGoal;
@@ -115,7 +120,7 @@ export function GoalsProvider({ children }: { children: React.ReactNode }) {
         }
     }, []);
 
-    const updateGoal = useCallback(async (goalId: string, title: string, description: string) => {
+    const updateGoal = useCallback(async (goalId: string, title: string, description: string, category: GoalCategory, targetAmount?: number, currentAmount?: number) => {
         // Store original for rollback
         let originalGoal: Goal | undefined;
 
@@ -124,14 +129,14 @@ export function GoalsProvider({ children }: { children: React.ReactNode }) {
             prev.map((g) => {
                 if (g.id === goalId) {
                     originalGoal = g;
-                    return { ...g, title, description };
+                    return { ...g, title, description, category, targetAmount, currentAmount: currentAmount ?? g.currentAmount };
                 }
                 return g;
             })
         );
 
         try {
-            const updatedGoal = await api.updateGoal(goalId, title, description);
+            const updatedGoal = await api.updateGoal(goalId, title, description, category, targetAmount, currentAmount);
             // Sync with server response
             setGoals((prev) =>
                 prev.map((g) => (g.id === goalId ? updatedGoal : g))
@@ -148,6 +153,43 @@ export function GoalsProvider({ children }: { children: React.ReactNode }) {
             throw error;
         }
     }, []);
+
+    const updateSavingsAmount = useCallback(async (goalId: string, delta: number) => {
+        const goal = goals.find(g => g.id === goalId);
+        if (!goal || goal.type !== 'savings') return;
+
+        const originalGoal = goal;
+        const newAmount = (goal.currentAmount || 0) + delta;
+
+        // Optimistic update
+        setGoals((prev) =>
+            prev.map((g) => {
+                if (g.id === goalId) {
+                    return { ...g, currentAmount: newAmount };
+                }
+                return g;
+            })
+        );
+
+        try {
+            // We need to pass all fields to updateGoal currently
+            // Ideally API should support PATCH for amount only
+            await api.updateGoal(goal.id, goal.title, goal.description || '', goal.category, goal.targetAmount, newAmount);
+
+            // Refresh activity if amount increased (optional gamification)
+            if (delta > 0) {
+                const analytics = await api.getAnalytics();
+                setDailyActivity(analytics.activity);
+            }
+        } catch (error) {
+            // Rollback
+            setGoals((prev) =>
+                prev.map((g) => (g.id === goalId ? originalGoal : g))
+            );
+            console.error('Failed to update savings amount:', error);
+            throw error;
+        }
+    }, [goals]);
 
     const deleteGoal = useCallback(async (goalId: string) => {
         // Store for rollback
@@ -693,6 +735,11 @@ export function GoalsProvider({ children }: { children: React.ReactNode }) {
             const completed = goal.subGoals.filter((sg) => sg.completed).length;
             return Math.round((completed / goal.subGoals.length) * 100);
         }
+        if (goal.type === 'savings') {
+            if (!goal.targetAmount || goal.targetAmount === 0) return 0;
+            const progress = ((goal.currentAmount || 0) / goal.targetAmount) * 100;
+            return Math.round(progress > 100 ? 100 : progress);
+        }
         return 0;
     }, []);
 
@@ -726,6 +773,7 @@ export function GoalsProvider({ children }: { children: React.ReactNode }) {
             isLoading,
             addGoal,
             updateGoal,
+            updateSavingsAmount,
             deleteGoal,
             addMonth,
             deleteMonth,
@@ -746,6 +794,7 @@ export function GoalsProvider({ children }: { children: React.ReactNode }) {
             isLoading,
             addGoal,
             updateGoal,
+            updateSavingsAmount,
             deleteGoal,
             addMonth,
             deleteMonth,

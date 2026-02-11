@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   type ViewStyle,
   type TextStyle,
+  type StyleProp,
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { borderRadius, fontSize, spacing } from '../../theme/styles';
@@ -21,7 +22,8 @@ interface ButtonProps {
   disabled?: boolean;
   loading?: boolean;
   fullWidth?: boolean;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
 }
 
 export function Button({
@@ -33,6 +35,7 @@ export function Button({
   loading = false,
   fullWidth = false,
   style,
+  textStyle,
 }: ButtonProps) {
   const { colors } = useTheme();
 
@@ -109,7 +112,7 @@ export function Button({
       {loading ? (
         <ActivityIndicator size="small" color={getTextColor()} />
       ) : (
-        <Text style={[styles.text, sizeStyles.text, { color: getTextColor() }]}>
+        <Text style={[styles.text, sizeStyles.text, { color: getTextColor() }, textStyle]}>
           {children}
         </Text>
       )}

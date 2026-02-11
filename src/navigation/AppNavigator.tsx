@@ -1,19 +1,29 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Svg, { Path, Circle } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 import { GoalsScreen } from '../screens/GoalsScreen';
 import { AnalyticsScreen } from '../screens/AnalyticsScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
+import { PrivacyPolicyScreen } from '../screens/PrivacyPolicyScreen';
 import { useTheme } from '../contexts/ThemeContext';
 
+// Tab Params
 export type AppTabParamList = {
   Goals: undefined;
   Analytics: undefined;
   Settings: undefined;
 };
 
+// Stack Params
+export type AppStackParamList = {
+  MainTabs: undefined;
+  PrivacyPolicy: undefined;
+};
+
 const Tab = createBottomTabNavigator<AppTabParamList>();
+const Stack = createNativeStackNavigator<AppStackParamList>();
 
 function GoalsIcon({ color, size }: { color: string; size: number }) {
   return (
@@ -44,7 +54,7 @@ export function SettingsIcon({ color, size }: { color: string; size: number }) {
   );
 }
 
-export function AppNavigator() {
+function TabNavigator() {
   const { colors } = useTheme();
   const { t } = useTranslation();
 
@@ -92,5 +102,14 @@ export function AppNavigator() {
         }}
       />
     </Tab.Navigator>
+  );
+}
+
+export function AppNavigator() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="MainTabs" component={TabNavigator} />
+      <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
+    </Stack.Navigator>
   );
 }

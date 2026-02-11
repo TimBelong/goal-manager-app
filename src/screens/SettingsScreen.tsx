@@ -1,9 +1,12 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Circle, Path, Rect } from 'react-native-svg';
+import Svg, { Circle, Path } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
-import { Select } from '../components/ui';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AppStackParamList } from '../navigation/AppNavigator';
+import { Select, ConfirmModal } from '../components/ui';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -70,7 +73,7 @@ const RuFlagIcon = () => (
 );
 
 const EnFlagIcon = () => (
-  <Image source={require('../assets/images/en-flag.png')} style={styles.flagIcon} />  
+  <Image source={require('../assets/images/en-flag.png')} style={styles.flagIcon} />
 );
 
 const EsFlagIcon = () => (
@@ -97,11 +100,40 @@ const LogoutIcon = ({ color }: { color: string }) => (
   </Svg>
 );
 
+
+
+const PrivacyIcon = ({ color }: { color: string }) => (
+  <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+  </Svg>
+);
+
+const TrashIcon = ({ color }: { color: string }) => (
+  <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
+    <Path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" strokeLinecap="round" strokeLinejoin="round" />
+  </Svg>
+);
+
 export function SettingsScreen() {
   const { t } = useTranslation();
   const { colors, isDark, setTheme } = useTheme();
   const { language, changeLanguage } = useLanguage();
-  const { logout, user } = useAuth();
+  const { logout, user, deleteAccount } = useAuth();
+  const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteAccount();
+    } catch (error) {
+      Alert.alert(t('common.error'), t('settings.deleteAccountError'));
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
 
   const languageOptions = SUPPORTED_LANGUAGES.map((lang) => {
     let icon;
@@ -110,7 +142,7 @@ export function SettingsScreen() {
     else if (lang === 'es') icon = <EsFlagIcon />;
     else if (lang === 'zh') icon = <ZhFlagIcon />;
     else if (lang === 'ar') icon = <ArFlagIcon />;
-    
+
     return {
       value: lang,
       label: languageNames[lang],
@@ -134,7 +166,7 @@ export function SettingsScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-        <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.textPrimary} strokeWidth={2}>
+          <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.textPrimary} strokeWidth={2}>
             <Circle cx="12" cy="12" r="5" />
             <Path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 
             1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.08a1.65 1.65 0 0 0 
@@ -148,7 +180,7 @@ export function SettingsScreen() {
         {/* Account Block */}
         {user && (
           <View style={[styles.settingsBlock, { backgroundColor: colors.bgSecondary, borderColor: colors.borderColor }]}>
-             <View style={styles.accountContent}>
+            <View style={styles.accountContent}>
               <View style={[styles.avatar, { backgroundColor: colors.accentPrimary }]}>
                 <Text style={styles.avatarText}>
                   {user.name
@@ -169,7 +201,7 @@ export function SettingsScreen() {
                 </Text>
               </View>
             </View>
-           
+
           </View>
         )}
 
@@ -237,7 +269,42 @@ export function SettingsScreen() {
             {t('auth.logout')}
           </Text>
         </TouchableOpacity>
+
+        {/* Privacy Policy Button */}
+        <TouchableOpacity
+          style={[styles.logoutButton, { borderColor: colors.borderColor, marginTop: spacing.md }]}
+          onPress={() => navigation.navigate('PrivacyPolicy')}
+          activeOpacity={0.7}
+        >
+          <PrivacyIcon color={colors.textPrimary} />
+          <Text style={[styles.logoutText, { color: colors.textPrimary }]}>
+            {t('settings.privacyPolicy', 'Privacy Policy')}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Delete Account Button */}
+        <TouchableOpacity
+          style={[styles.deleteAccountButton, { backgroundColor: colors.danger }]}
+          onPress={() => setShowDeleteConfirm(true)}
+          activeOpacity={0.7}
+        >
+          <TrashIcon color="#ffffff" />
+          <Text style={styles.deleteAccountText}>
+            {t('settings.deleteAccount')}
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
+
+      <ConfirmModal
+        visible={showDeleteConfirm}
+        title={t('settings.deleteAccount')}
+        message={t('settings.deleteAccountConfirm')}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
+        variant="danger"
+        onConfirm={handleDeleteAccount}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -339,6 +406,20 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
   },
   logoutText: {
+    fontSize: fontSize.sm,
+    fontWeight: '600',
+  },
+  deleteAccountButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.md,
+    marginTop: spacing.sm,
+  },
+  deleteAccountText: {
+    color: '#ffffff',
     fontSize: fontSize.sm,
     fontWeight: '600',
   },
